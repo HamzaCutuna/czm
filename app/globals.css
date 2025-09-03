@@ -1,0 +1,585 @@
+/* Leaflet CSS */
+@import 'leaflet/dist/leaflet.css';
+
+/* Avoid accidental horizontal overflow when portals apply transforms */
+body {
+  overflow-x: hidden;
+}
+
+/* Leaflet container fixes */
+.leaflet-container { 
+  background: transparent !important; 
+  z-index: 1 !important;
+  position: relative !important;
+}
+
+/* Ensure proper z-index layering for map components */
+.leaflet-popup {
+  z-index: 1000 !important;
+}
+
+.leaflet-control {
+  z-index: 1000 !important;
+}
+
+/* Ensure EventModal appears above everything */
+.event-modal-overlay {
+  z-index: 9999 !important;
+  position: relative;
+}
+
+.event-modal-overlay [role="dialog"] {
+  z-index: 10000 !important;
+}
+
+.event-modal-overlay .fixed {
+  z-index: 10000 !important;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .scrollbar-stable { 
+    scrollbar-gutter: stable; 
+  }
+}
+
+@font-face {
+  font-family: 'Baskervville';
+  src: url('/fonts/Baskervville-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Baskervville';
+  src: url('/fonts/Baskervville-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Baskervville';
+  src: url('/fonts/Baskervville-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Baskervville';
+  src: url('/fonts/Baskervville-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MarcellusSC';
+  src: url('/fonts/MarcellusSC-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Forum';
+  src: url('/fonts/Forum-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --color-bg: #F6F1E7;
+    --color-primary: #4F8A5B;
+    --color-secondary: #C4A484;
+    --font-heading: 'MarcellusSC', serif;
+    --font-body: 'Baskervville', serif;
+    --font-numbers: 'Forum', serif;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    @apply text-stone-800;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+
+  /* ===== Modern Rounded Scrollbar (Global) ===== */
+
+  /* Firefox */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: #7a6858 transparent;
+    /* Keep scrollbar space to avoid layout shift - only on the right side */
+    scrollbar-gutter: stable;
+    /* fallback for older browsers */
+    overflow-y: scroll;
+  }
+
+  /* WebKit (Chrome, Edge, Safari) */
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 9999px; /* rounded track */
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: #7a6858;
+    border-radius: 9999px; /* rounded thumb */
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: #8a7766;
+  }
+
+  *::-webkit-scrollbar-thumb:active {
+    background: #9a8776;
+  }
+
+  *::-webkit-scrollbar-button {
+    display: none !important; /* removes arrows */
+    width: 0;
+    height: 0;
+  }
+
+  /* Optional: slightly darker thumb for elements over light backgrounds */
+  .light-scroll *::-webkit-scrollbar-thumb {
+    background: #6b5b4d;
+  }
+
+  /* Optional: hide scrollbar but keep scrolling (use sparingly) */
+  /* .no-scrollbar::-webkit-scrollbar { display: none; }
+     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; } */
+}
+
+@layer components {
+  .focus-ring {
+    @apply focus-visible:ring-2 focus-visible:ring-[--color-primary] focus-visible:ring-offset-2 focus-visible:ring-offset-[--color-bg];
+  }
+
+  /* Ensure navbar transparency */
+  header[style*="transparent"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+  }
+
+  /* Custom Swiper styles */
+  .swiper-pagination-bullet {
+    background: var(--color-secondary) !important;
+    opacity: 0.6 !important;
+  }
+  
+  .swiper-pagination-bullet-active {
+    background: var(--color-primary) !important;
+    opacity: 1 !important;
+  }
+  
+  .swiper-pagination-bullet-active-main {
+    background: var(--color-primary) !important;
+    opacity: 1 !important;
+  }
+  
+  .swiper-pagination-bullet-active-prev,
+  .swiper-pagination-bullet-active-next {
+    background: var(--color-secondary) !important;
+    opacity: 0.8 !important;
+  }
+
+  /* Today Swiper - 3D appearance with 3 events */
+  .today-swiper {
+    perspective: 1200px;
+    overflow: visible !important;
+  }
+
+  .today-swiper .swiper-wrapper {
+    transform-style: preserve-3d;
+    overflow: visible !important;
+  }
+
+  .today-swiper .swiper-slide {
+    transform-style: preserve-3d;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: visible !important;
+  }
+
+  /* Center slide - sharp and prominent */
+  .today-swiper .swiper-slide-active {
+    filter: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    z-index: 10 !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  /* Previous slide - subtle 3D effect */
+  .today-swiper .swiper-slide-prev {
+    filter: blur(1px) !important;
+    opacity: 0.85 !important;
+    transform: scale(0.95) rotateY(-5deg) !important;
+    z-index: 5 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Next slide - subtle 3D effect */
+  .today-swiper .swiper-slide-next {
+    filter: blur(1px) !important;
+    opacity: 0.85 !important;
+    transform: scale(0.95) rotateY(5deg) !important;
+    z-index: 5 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Other slides - more blurred and smaller */
+  .today-swiper .swiper-slide:not(.swiper-slide-active):not(.swiper-slide-prev):not(.swiper-slide-next) {
+    filter: blur(2px) !important;
+    opacity: 0.6 !important;
+    transform: scale(0.9) !important;
+    z-index: 1 !important;
+  }
+
+  /* Hover effects for all slides */
+  .today-swiper .swiper-slide:hover {
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2) !important;
+    z-index: 15 !important;
+  }
+
+  /* Mobile scroll indicator animation */
+  @media (max-width: 1023px) {
+    .today-swiper .swiper-slide {
+      animation: mobileSlideHint 3s ease-in-out infinite;
+    }
+
+    .today-swiper .swiper-slide:nth-child(2) {
+      animation-delay: 0.5s;
+    }
+
+    .today-swiper .swiper-slide:nth-child(3) {
+      animation-delay: 1s;
+    }
+
+    @keyframes mobileSlideHint {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-5px);
+      }
+      75% {
+        transform: translateX(5px);
+      }
+    }
+
+    /* Add subtle pulse to pagination on mobile */
+    .today-swiper .swiper-pagination {
+      animation: paginationPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes paginationPulse {
+      0%, 100% {
+        opacity: 0.8;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+  }
+
+  /* Pagination positioning - below cards */
+  .today-swiper .swiper-pagination {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: -40px !important;
+    text-align: center !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 12px !important;
+    z-index: 10 !important;
+  }
+
+  .today-swiper .swiper-pagination-bullet {
+    background: #BFA48D !important;
+    opacity: 0.5 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    margin: 0 !important;
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+  }
+  
+  .today-swiper .swiper-pagination-bullet-active {
+    background: #4F8A5B !important;
+    opacity: 1 !important;
+    transform: scale(1.3) !important;
+    box-shadow: 0 2px 8px rgba(79, 138, 91, 0.4) !important;
+  }
+
+  .today-swiper .swiper-pagination-bullet:hover {
+    opacity: 0.8 !important;
+    transform: scale(1.2) !important;
+    background: #4F8A5B !important;
+  }
+
+  /* Text truncation utilities */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Smooth scrolling for better UX */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Better focus styles for accessibility */
+  .focus-ring {
+    @apply focus-visible:ring-2 focus-visible:ring-[--color-primary] focus-visible:ring-offset-2 focus-visible:ring-offset-white;
+  }
+
+  /* Number font utility */
+  .font-numbers {
+    font-family: var(--font-numbers);
+  }
+
+  /* Apply Forum font to all numbers */
+  .font-numbers * {
+    font-family: var(--font-numbers);
+  }
+
+  /* Target specific number elements */
+  .score-number,
+  .date-number,
+  .time-number,
+  .percentage-number,
+  .count-number,
+  .year-number,
+  .phone-number,
+  .id-number {
+    font-family: var(--font-numbers);
+  }
+
+  /* Apply Forum font to numbers in specific contexts */
+  .text-6xl,
+  .text-5xl,
+  .text-4xl,
+  .text-3xl,
+  .text-2xl,
+  .text-xl,
+  .text-lg,
+  .text-base,
+  .text-sm,
+  .text-xs {
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Apply Forum font to quiz scores */
+  .quiz-score {
+    font-family: var(--font-numbers);
+  }
+
+  /* Apply Forum font to dates */
+  .date-display {
+    font-family: var(--font-numbers);
+  }
+
+  /* Apply Forum font to percentages */
+  .percentage-display {
+    font-family: var(--font-numbers);
+  }
+
+  /* Apply Forum font to time displays */
+  .time-display {
+    font-family: var(--font-numbers);
+  }
+
+  /* Prose styles for modal content */
+  .prose {
+    @apply text-stone-700;
+  }
+
+  .prose p {
+    @apply mb-4 last:mb-0;
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    @apply text-stone-800 font-semibold mb-3;
+  }
+
+  .prose ul, .prose ol {
+    @apply mb-4 pl-6;
+  }
+
+  .prose li {
+    @apply mb-1;
+  }
+
+  /* Fix dropdown transparency and layout shifts */
+  [data-radix-select-content] {
+    background: white !important;
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    z-index: 50 !important;
+    opacity: 1 !important;
+  }
+
+  /* Prevent Radix UI from modifying body overflow */
+  [data-radix-select-root] {
+    position: relative !important;
+  }
+
+  [data-radix-select-item] {
+    background: white !important;
+    color: #374151 !important;
+  }
+
+  [data-radix-select-item]:hover {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+  }
+
+  [data-radix-select-item][data-highlighted] {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+  }
+
+  /* Ensure dropdowns don't cause layout shifts */
+  [data-radix-select-trigger] {
+    position: relative !important;
+  }
+
+  /* Fix for Radix UI Select causing scrollbar issues */
+  [data-radix-select-portal] {
+    position: fixed !important;
+    z-index: 9999 !important;
+  }
+
+  /* Ensure Radix UI Select doesn't modify body overflow */
+  [data-radix-select-root] {
+    position: relative !important;
+  }
+
+  /* Prevent any overflow changes on body from Radix components */
+  body {
+    overflow-x: hidden !important;
+  }
+
+  /* Ensure html maintains scrollbar space */
+  html {
+    scrollbar-gutter: stable !important;
+    overflow-y: scroll !important;
+  }
+
+  /* Ensure dropdown menus are properly positioned and don't cause layout shifts */
+  [data-radix-dropdown-menu-content] {
+    position: fixed !important;
+    z-index: 9999 !important;
+    background: white !important;
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    max-width: calc(100vw - 2rem) !important;
+    overflow: hidden !important;
+  }
+
+  /* Prevent any body overflow changes from dropdown menus */
+  body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Ensure dropdown triggers don't cause layout shifts */
+  [data-radix-dropdown-menu-trigger] {
+    position: relative !important;
+  }
+
+  /* Ensure main container doesn't overflow */
+  .container {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Prevent any horizontal overflow on the main content */
+  main {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+  }
+
+  /* Ensure dropdown portal content is properly contained */
+  [data-radix-dropdown-menu-portal] {
+    position: fixed !important;
+    z-index: 9999 !important;
+  }
+
+  /* Prevent dropdown content from extending beyond viewport */
+  [data-radix-dropdown-menu-content] {
+    max-width: min(256px, calc(100vw - 2rem)) !important;
+    left: auto !important;
+    right: auto !important;
+  }
+}
