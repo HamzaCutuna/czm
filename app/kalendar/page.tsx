@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState, Suspense } from "react";
 import CalendarHeader from "@/components/calendar/CalendarHeader";
 import CategoryFilter from "@/components/calendar/CategoryFilter";
-import EventsCarousel from "@/components/calendar/EventsCarousel";
 import EventModal from "@/components/calendar/EventModal";
 import EventCard from "@/components/calendar/EventCard";
 import CustomDatePicker from "@/components/calendar/CustomDatePicker";
