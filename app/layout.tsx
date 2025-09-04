@@ -6,6 +6,24 @@ import { SiteFooter } from "@/components/footer/SiteFooter";
 export const metadata: Metadata = {
   title: "TV Kalendar - Historijski događaji",
   description: "Digitalno očuvanje kulturnog i historijskog naslijeđa kroz interaktivnu web platformu",
+  openGraph: {
+    title: "TV Kalendar - Historijski događaji",
+    description: "Digitalno očuvanje kulturnog i historijskog naslijeđa kroz interaktivnu web platformu",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "TV Kalendar - Historijski događaji",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TV Kalendar - Historijski događaji",
+    description: "Digitalno očuvanje kulturnog i historijskog naslijeđa kroz interaktivnu web platformu",
+    images: ["/images/og-image.jpg"],
+  },
 };
 
 export default function RootLayout({

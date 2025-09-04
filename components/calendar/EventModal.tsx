@@ -29,8 +29,8 @@ export default function EventModal({ open, event, onOpenChange }: EventModalProp
               </DialogTitle>
             </DialogHeader>
             {event.imageUrl && (
-              <div className="mt-3 rounded-xl overflow-hidden bg-stone-100">
-                <img src={event.imageUrl} alt={event.title} className="w-full h-auto object-cover" />
+              <div className="mt-3 rounded-xl overflow-hidden bg-stone-100 max-h-96">
+                <img src={event.imageUrl} alt={event.title} className="w-full h-auto object-cover max-h-96" />
               </div>
             )}
             <div className="mt-4 prose prose-stone max-w-none text-stone-800">
