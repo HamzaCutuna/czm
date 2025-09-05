@@ -1,9 +1,12 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useTodayEvents } from "@/hooks/useTodayEvents";
 import { TodaySwiper } from "./TodaySwiper";
 import { todayInSarajevo } from "@/lib/tz";
+import CustomDatePicker from "@/components/calendar/CustomDatePicker";
+import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 
 // Helper function to format date
@@ -11,14 +14,75 @@ function formatBsDate(d: number, m: number) {
   return `${d}.${m}.`;
 }
 
-export function HeroToday() {
-  const { data, error, isLoading } = useTodayEvents();
+interface HeroTodayProps {
+  selectedDate: Date;
+  onDateChange: (date: Date) => void;
+}
+
+export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
   const today = todayInSarajevo();
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   
-  // Use found date from API if available, otherwise use today
+  // Convert selected date to day/month format for the API
+  const selectedDay = selectedDate.getDate();
+  const selectedMonth = selectedDate.getMonth() + 1;
+  
+  const { data, error, isLoading } = useTodayEvents(selectedDay, selectedMonth);
+  
+  // Use found date from API if available, otherwise use selected date
   const displayDate = data?.dogadajiDate && data.dogadajiDate.Dan && data.dogadajiDate.Mjesec ? 
     { dan: data.dogadajiDate.Dan, mjesec: data.dogadajiDate.Mjesec } : 
-    today;
+    { dan: selectedDay, mjesec: selectedMonth };
+
+  const handleDateConfirm = (date: Date) => {
+    onDateChange(date);
+    setIsDatePickerOpen(false);
+  };
+
+  const handlePreviousDay = useCallback(() => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() - 1);
+    onDateChange(newDate);
+  }, [selectedDate, onDateChange]);
+
+  const handleNextDay = useCallback(() => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + 1);
+    onDateChange(newDate);
+  }, [selectedDate, onDateChange]);
+
+  const handleToday = useCallback(() => {
+    const today = todayInSarajevo();
+    onDateChange(new Date(2024, today.mjesec - 1, today.dan));
+  }, [onDateChange]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only handle arrow keys when no input/textarea is focused
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      switch (event.key) {
+        case 'ArrowLeft':
+          event.preventDefault();
+          handlePreviousDay();
+          break;
+        case 'ArrowRight':
+          event.preventDefault();
+          handleNextDay();
+          break;
+        case 'Home':
+          event.preventDefault();
+          handleToday();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePreviousDay, handleNextDay, handleToday]);
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
@@ -80,23 +144,60 @@ export function HeroToday() {
           )}
         </motion.div>
 
-        {/* Date chip */}
+        {/* Date chip with navigation */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="inline-flex items-center text-sm text-white/90 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 border border-white/20"
+          className="inline-flex items-center text-sm text-white/90 bg-white/10 backdrop-blur-sm rounded-full px-4 py-3 border border-white/20"
         >
-          <span>
-            <strong>Datum:</strong> {formatBsDate(displayDate.dan, displayDate.mjesec)}
-          </span>
+          {/* Previous button */}
+          <button
+            onClick={handlePreviousDay}
+            className="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors mr-2"
+            title="Prethodni dan"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          {/* Date display */}
+          <div
+            className="flex items-center cursor-pointer hover:bg-white/10 rounded-full px-3 py-1 transition-colors"
+            onClick={() => setIsDatePickerOpen(true)}
+          >
+            <Calendar className="h-4 w-4 mr-2" />
+            <span>
+              <strong>Datum:</strong> {formatBsDate(displayDate.dan, displayDate.mjesec)}
+            </span>
+          </div>
+
+          {/* Next button */}
+          <button
+            onClick={handleNextDay}
+            className="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors ml-2"
+            title="Sledeći dan"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+
+          {/* Today button */}
+          <button
+            onClick={handleToday}
+            className="ml-3 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-xs font-medium"
+            title="Danas"
+          >
+            Danas
+          </button>
         </motion.div>
       </div>
 
-      {/* Accessibility note for background image */}
-      <div className="sr-only">
-        Pozadinska slika: Stari most u Mostaru, Bosna i Hercegovina. Fotografija sa Pexels.
-      </div>
+      {/* Date Picker Modal */}
+      <CustomDatePicker
+        open={isDatePickerOpen}
+        date={selectedDate}
+        onOpenChange={setIsDatePickerOpen}
+        onConfirm={handleDateConfirm}
+      />
     </section>
   );
 }

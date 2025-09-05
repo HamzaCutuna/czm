@@ -10,7 +10,11 @@ import sampleEvents from "@/data/sampleEvents";
 
 const LeafletClient = dynamic(() => import("./LeafletClient"), { ssr: false });
 
-function HistoricalMap() {
+interface HistoricalMapProps {
+  selectedDate: Date;
+}
+
+function HistoricalMap({ selectedDate }: HistoricalMapProps) {
   const [mounted, setMounted] = useState(false);
   const [events, setEvents] = useState<NormalizedEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,9 +39,14 @@ function HistoricalMap() {
       setError(null);
       setIsUsingSampleData(false);
       
+      // Convert selected date to day/month format for the API
+      const day = selectedDate.getDate();
+      const month = selectedDate.getMonth() + 1;
+      
       let json: unknown = null;
       try {
-        const res = await fetch('/api/today-events', { cache: 'no-store' });
+        const qs = new URLSearchParams({ dan: String(day), mjesec: String(month) });
+        const res = await fetch(`/api/today-events?${qs.toString()}`, { cache: 'no-store' });
         if (res.ok) {
           json = await res.json();
           console.log('API response received:', json);
@@ -90,7 +99,7 @@ function HistoricalMap() {
       setEvents(resolved);
       setLoading(false);
     })();
-  }, []);
+  }, [selectedDate]);
 
   const pins = useMemo(() => groupByCoordinate(events, 3), [events]);
 
