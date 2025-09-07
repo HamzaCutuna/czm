@@ -6,6 +6,13 @@ import { SiteFooter } from "@/components/footer/SiteFooter";
 export const metadata: Metadata = {
   title: "TV Kalendar - Historijski događaji",
   description: "Digitalno očuvanje kulturnog i historijskog naslijeđa kroz interaktivnu web platformu",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
+  },
   openGraph: {
     title: "TV Kalendar - Historijski događaji",
     description: "Digitalno očuvanje kulturnog i historijskog naslijeđa kroz interaktivnu web platformu",

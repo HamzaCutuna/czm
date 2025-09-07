@@ -42,7 +42,7 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 z-50 w-full transition-all duration-300",
+        "fixed top-0 z-50 w-full transition-all duration-300 safe-area-top safe-area-left safe-area-right",
         isSolid || isMobileMenuOpen
           ? "bg-[#F6F1E7]/95 text-stone-900 shadow-sm backdrop-blur-xl border-b border-stone-300/50"
           : "text-white"
@@ -53,22 +53,23 @@ export function Navbar() {
         backgroundImage: 'none !important'
       } : {}}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-8">
         <div className="flex h-14 items-center justify-between">
           {/* Logo and Brand */}
           <Link
             href="/"
-            className="flex items-center space-x-3 focus-ring rounded-md"
+            className="flex items-center space-x-2 sm:space-x-3 focus-ring rounded-md min-w-0 flex-shrink-0"
             onClick={closeMobileMenu}
           >
-            <div className="h-8 w-8 rounded-full flex items-center justify-center">
-              <Image src="/images/logo.png" alt="Centar za mir" className="h-8 w-8" width={32} height={32} />
+            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full flex items-center justify-center flex-shrink-0">
+              <Image src="/images/logo.png" alt="Centar za mir" className="h-6 w-6 sm:h-8 sm:w-8" width={32} height={32} />
             </div>
             <span className={cn(
-              "text-lg font-semibold transition-colors duration-300 font-heading",
+              "text-xs sm:text-lg font-semibold transition-colors duration-300 font-heading truncate",
               isSolid || isMobileMenuOpen ? "text-stone-800" : "text-white drop-shadow-lg"
             )}>
-              Centar za mir
+              <span className="hidden xs:inline">Centar za mir</span>
+              <span className="xs:hidden">CZM</span>
             </span>
           </Link>
 

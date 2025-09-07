@@ -44,6 +44,125 @@ body {
   .scrollbar-stable { 
     scrollbar-gutter: stable; 
   }
+  
+  /* Safe area utilities for mobile devices */
+  .safe-area-top {
+    padding-top: var(--safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: var(--safe-area-inset-bottom);
+  }
+  
+  .safe-area-left {
+    padding-left: var(--safe-area-inset-left);
+  }
+  
+  .safe-area-right {
+    padding-right: var(--safe-area-inset-right);
+  }
+  
+  .safe-area-all {
+    padding-top: var(--safe-area-inset-top);
+    padding-right: var(--safe-area-inset-right);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+  }
+  
+  /* Dynamic viewport height utilities */
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
+  
+  .h-dvh {
+    height: 100dvh;
+  }
+  
+  /* Mobile-specific viewport handling */
+  @supports (height: 100dvh) {
+    .min-h-screen-mobile {
+      min-height: 100dvh;
+    }
+  }
+  
+  @supports not (height: 100dvh) {
+    .min-h-screen-mobile {
+      min-height: 100vh;
+    }
+  }
+  
+  /* Safari-specific fixes for bottom tab bar */
+  @media screen and (max-width: 768px) {
+    .min-h-screen-mobile {
+      min-height: calc(100vh - env(safe-area-inset-bottom, 0px));
+    }
+    
+    /* Ensure content doesn't get hidden behind Safari's bottom tab bar */
+    .hero-content {
+      padding-bottom: max(env(safe-area-inset-bottom, 0px), 20px);
+    }
+    
+    /* Force full height on mobile */
+    .h-screen {
+      height: 100vh !important;
+      height: 100dvh !important;
+      min-height: 100vh !important;
+      min-height: 100dvh !important;
+    }
+  }
+  
+  /* Ensure hero section takes full viewport */
+  section:first-child {
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+  }
+  
+  /* Additional mobile optimizations */
+  @media screen and (max-width: 480px) {
+    .container {
+      padding-left: max(env(safe-area-inset-left, 0px), 12px);
+      padding-right: max(env(safe-area-inset-right, 0px), 12px);
+    }
+  }
+  
+  /* Extra small screens (iPhone SE, etc.) */
+  @media screen and (max-width: 375px) {
+    .min-h-screen-mobile {
+      min-height: calc(100vh - env(safe-area-inset-bottom, 0px) - 20px);
+    }
+    
+    /* Make navbar even more compact */
+    header .container {
+      padding-left: max(env(safe-area-inset-left, 0px), 8px) !important;
+      padding-right: max(env(safe-area-inset-right, 0px), 8px) !important;
+    }
+    
+    /* Reduce hero content padding */
+    .hero-content {
+      padding-left: 8px !important;
+      padding-right: 8px !important;
+    }
+    
+    /* Make everything even more compact */
+    .hero-content .text-2xl {
+      font-size: 1.5rem !important;
+      line-height: 1.2 !important;
+    }
+    
+    .hero-content .mb-4 {
+      margin-bottom: 0.5rem !important;
+    }
+    
+    .hero-content .mb-6 {
+      margin-bottom: 1rem !important;
+    }
+    
+    .hero-content .mb-12 {
+      margin-bottom: 1.5rem !important;
+    }
+  }
 }
 
 @font-face {
@@ -134,16 +253,24 @@ body {
     --font-heading: 'MarcellusSC', serif;
     --font-body: 'Baskervville', serif;
     --font-numbers: 'Forum', serif;
+    
+    /* Safe area insets for mobile devices */
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
   }
 
   html, body {
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
   }
 
   body {
     @apply text-stone-800;
     font-family: var(--font-body);
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -568,6 +695,28 @@ body {
   main {
     overflow-x: hidden !important;
     max-width: 100% !important;
+  }
+  
+  /* Ensure hero section takes full height and hides next sections */
+  section:first-of-type {
+    position: relative;
+    z-index: 10;
+  }
+  
+  /* Hide overflow on body to prevent white lines */
+  body {
+    overflow-x: hidden !important;
+  }
+  
+  /* Prevent body scroll when hero is in view */
+  html {
+    overflow-x: hidden !important;
+  }
+  
+  /* Ensure first section takes full viewport */
+  body > div > main > section:first-child {
+    height: 100vh !important;
+    min-height: 100vh !important;
   }
 
   /* Ensure dropdown portal content is properly contained */

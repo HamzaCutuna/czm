@@ -85,7 +85,7 @@ export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
   }, [handlePreviousDay, handleNextDay, handleToday]);
 
   return (
-    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
+    <section className="relative h-screen flex flex-col justify-center overflow-hidden safe-area-top safe-area-bottom" style={{ height: '100vh', minHeight: '100vh' }}>
       {/* Nav sentinel for navbar transparency detection */}
       <div id="nav-sentinel" className="absolute top-0 h-20 w-px" />
       
@@ -103,17 +103,17 @@ export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
       </div>
       
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center hero-content">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-12"
+          className="mb-4 xs:mb-8 sm:mb-12"
         >
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-lg font-heading">
+          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2 xs:mb-4 sm:mb-6 drop-shadow-lg font-heading px-2">
             Na današnji dan
           </h1>
-          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed drop-shadow-md font-body">
+          <p className="hidden xs:block text-base sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed drop-shadow-md font-body px-4">
             Pregled događaja iz historije na današnji datum.
           </p>
         </motion.div>
@@ -123,7 +123,7 @@ export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-12"
+          className="mb-6 xs:mb-12"
         >
           {error ? (
             <div className="text-center py-12">
@@ -149,24 +149,24 @@ export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="inline-flex items-center text-sm text-white/90 bg-white/10 backdrop-blur-sm rounded-full px-4 py-3 border border-white/20"
+          className="inline-flex items-center text-xs sm:text-sm text-white/90 bg-white/10 backdrop-blur-sm rounded-full px-2 xs:px-3 sm:px-4 py-1 xs:py-2 sm:py-3 border border-white/20 mx-1 xs:mx-2 sm:mx-0"
         >
           {/* Previous button */}
           <button
             onClick={handlePreviousDay}
-            className="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors mr-2"
+            className="h-6 w-6 xs:h-7 xs:w-7 sm:h-8 sm:w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors mr-1 sm:mr-2"
             title="Prethodni dan"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
           </button>
 
           {/* Date display */}
           <div
-            className="flex items-center cursor-pointer hover:bg-white/10 rounded-full px-3 py-1 transition-colors"
+            className="flex items-center cursor-pointer hover:bg-white/10 rounded-full px-1 xs:px-2 sm:px-3 py-1 transition-colors"
             onClick={() => setIsDatePickerOpen(true)}
           >
-            <Calendar className="h-4 w-4 mr-2" />
-            <span>
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="text-xs sm:text-sm">
               <strong>Datum:</strong> {formatBsDate(displayDate.dan, displayDate.mjesec)}
             </span>
           </div>
@@ -174,16 +174,16 @@ export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
           {/* Next button */}
           <button
             onClick={handleNextDay}
-            className="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors ml-2"
+            className="h-6 w-6 xs:h-7 xs:w-7 sm:h-8 sm:w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors ml-1 sm:ml-2"
             title="Sledeći dan"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
           </button>
 
           {/* Today button */}
           <button
             onClick={handleToday}
-            className="ml-3 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-xs font-medium"
+            className="ml-1 xs:ml-2 sm:ml-3 px-1 xs:px-2 sm:px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-xs font-medium"
             title="Danas"
           >
             Danas
