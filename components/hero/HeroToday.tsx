@@ -8,6 +8,7 @@ import { todayInSarajevo } from "@/lib/tz";
 import CustomDatePicker from "@/components/calendar/CustomDatePicker";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 // Helper function to format date
 function formatBsDate(d: number, m: number) {
@@ -198,6 +199,8 @@ export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
         onOpenChange={setIsDatePickerOpen}
         onConfirm={handleDateConfirm}
       />
+
+      
     </section>
   );
 }
