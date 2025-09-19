@@ -11,6 +11,9 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Globe, HelpCircle, BookOpen, Trophy, Star, Clock, ChevronDown } from "lucide-react";
+import { PowerupBar } from "@/components/quiz/PowerupBar";
+import { Leaderboard } from "@/components/quiz/Leaderboard";
+import { useWallet } from "@/components/wallet/WalletProvider";
 
 interface QuizQuestion {
   id: number;
@@ -88,6 +91,9 @@ export default function KvizPage() {
   const [funFact, setFunFact] = useState<FunFact | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [sampleQuestion, setSampleQuestion] = useState<QuizQuestion | null>(null);
+  const [removedOptions, setRemovedOptions] = useState<number[]>([]);
+  
+  const { wallet } = useWallet();
 
   const [settings, setSettings] = useState<QuizSettings>({
     region: "all",
@@ -335,6 +341,39 @@ export default function KvizPage() {
     setShowFeedback(false);
     setIsCorrect(null);
     setShowReview(false);
+    setRemovedOptions([]);
+  };
+
+  // Help functions
+  const handleFiftyFifty = () => {
+    const currentQuestion = questions[currentQuestionIndex];
+    if (!currentQuestion) return;
+    
+    const correctAnswer = currentQuestion.odgovori.find(answer => answer.tacan);
+    const wrongAnswers = currentQuestion.odgovori.filter(answer => !answer.tacan);
+    
+    // Remove two wrong answers randomly
+    const shuffled = wrongAnswers.sort(() => Math.random() - 0.5);
+    const toRemove = shuffled.slice(0, 2).map(answer => answer.id);
+    
+    setRemovedOptions(prev => [...prev, ...toRemove]);
+  };
+
+  const handleSkip = () => {
+    nextQuestion();
+  };
+
+  const handleRemoveOne = () => {
+    const currentQuestion = questions[currentQuestionIndex];
+    if (!currentQuestion) return;
+    
+    const correctAnswer = currentQuestion.odgovori.find(answer => answer.tacan);
+    const wrongAnswers = currentQuestion.odgovori.filter(answer => !answer.tacan);
+    
+    // Remove one wrong answer randomly
+    const randomWrong = wrongAnswers[Math.floor(Math.random() * wrongAnswers.length)];
+    
+    setRemovedOptions(prev => [...prev, randomWrong.id]);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -374,8 +413,8 @@ export default function KvizPage() {
 
   if (quizCompleted && result) {
     return (
-      <main className="container mx-auto px-4 py-16 bg-[--color-bg]">
-        <div className="max-w-2xl mx-aut ">
+      <main className="container mx-auto px-4 py-16 bg-[--color-bg] flex justify-center items-start">
+        <div className="max-w-2xl w-full">
           <Card className="border-0 shadow-2xl bg-gradient-to-br from-amber-50 to-stone-50">
             <CardHeader className="text-center">
               <CardTitle className="text-3xl font-bold text-amber-800 mb-2 font-heading">
@@ -514,6 +553,16 @@ export default function KvizPage() {
             </div>
           </div>
 
+          {/* Powerup Bar */}
+          <div className="mb-6">
+            <PowerupBar
+              onFiftyFifty={handleFiftyFifty}
+              onSkip={handleSkip}
+              onRemoveOne={handleRemoveOne}
+              disabled={showFeedback}
+            />
+          </div>
+
           <Card className="border-0 shadow-2xl bg-gradient-to-br from-amber-50 to-stone-50">
             <CardHeader>
               <div className="flex items-center justify-between mb-4">
@@ -558,52 +607,54 @@ export default function KvizPage() {
               {/* Answer Options */}
               <div className="space-y-3">
                 <h4 className="font-semibold font-['Baskervville']">Odaberite odgovor:</h4>
-                {currentQuestion.odgovori.map((answer) => {
-                  const isSelected = selectedAnswer === answer.id;
-                  const isCorrectAnswer = answer.tacan;
-                  const showCorrect = showFeedback && isCorrectAnswer;
-                  const showIncorrect = showFeedback && isSelected && !isCorrectAnswer;
+                {currentQuestion.odgovori
+                  .filter(answer => !removedOptions.includes(answer.id))
+                  .map((answer) => {
+                    const isSelected = selectedAnswer === answer.id;
+                    const isCorrectAnswer = answer.tacan;
+                    const showCorrect = showFeedback && isCorrectAnswer;
+                    const showIncorrect = showFeedback && isSelected && !isCorrectAnswer;
 
-                  return (
-                    <button
-                      key={answer.id}
-                      onClick={() => !showFeedback && selectAnswer(answer.id)}
-                      disabled={showFeedback}
-                      className={`w-full p-4 text-left rounded-lg border-2 transition-all ${showCorrect
-                        ? 'border-green-500 bg-green-50 text-green-800'
-                        : showIncorrect
-                          ? 'border-red-500 bg-red-50 text-red-800'
-                          : isSelected
-                            ? 'border-amber-400 bg-gradient-to-r from-amber-50 to-amber-100 text-amber-800'
-                            : showFeedback
-                              ? 'border-gray-200 bg-red-100 text-gray-500 cursor-not-allowed'
-                              : 'border-gray-200 hover:border-amber-300 hover:bg-amber-50'
-                        }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-4 h-4 rounded-full border-2 ${showCorrect
-                          ? 'border-green-500 bg-green-500'
+                    return (
+                      <button
+                        key={answer.id}
+                        onClick={() => !showFeedback && selectAnswer(answer.id)}
+                        disabled={showFeedback}
+                        className={`w-full p-4 text-left rounded-lg border-2 transition-all ${showCorrect
+                          ? 'border-green-500 bg-green-50 text-green-800'
                           : showIncorrect
-                            ? 'border-red-500 bg-red-500'
+                            ? 'border-red-500 bg-red-50 text-red-800'
                             : isSelected
-                              ? 'border-amber-400 bg-amber-400'
-                              : 'border-gray-300'
-                          }`}>
-                          {(isSelected || showCorrect) && (
-                            <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                              ? 'border-amber-400 bg-gradient-to-r from-amber-50 to-amber-100 text-amber-800'
+                              : showFeedback
+                                ? 'border-gray-200 bg-red-100 text-gray-500 cursor-not-allowed'
+                                : 'border-gray-200 hover:border-amber-300 hover:bg-amber-50'
+                          }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-4 h-4 rounded-full border-2 ${showCorrect
+                            ? 'border-green-500 bg-green-500'
+                            : showIncorrect
+                              ? 'border-red-500 bg-red-500'
+                              : isSelected
+                                ? 'border-amber-400 bg-amber-400'
+                                : 'border-gray-300'
+                            }`}>
+                            {(isSelected || showCorrect) && (
+                              <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                            )}
+                          </div>
+                          <span className="font-medium">{answer.tekstOdgovora}</span>
+                          {showCorrect && (
+                            <span className="ml-auto text-green-600 font-bold">Tačno</span>
+                          )}
+                          {showIncorrect && (
+                            <span className="ml-auto text-red-600 font-bold">Netačno</span>
                           )}
                         </div>
-                        <span className="font-medium">{answer.tekstOdgovora}</span>
-                        {showCorrect && (
-                          <span className="ml-auto text-green-600 font-bold">Tačno</span>
-                        )}
-                        {showIncorrect && (
-                          <span className="ml-auto text-red-600 font-bold">Netačno</span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
               </div>
 
               {/* Navigation */}
@@ -657,6 +708,19 @@ export default function KvizPage() {
           <p className="text-xl text-stone-600 max-w-2xl mx-auto leading-relaxed">
             Testirajte svoje znanje o historijskim događajima i otkrijte fascinantne priče iz prošlosti
           </p>
+          
+          {/* Diamonds Display */}
+          {wallet && (
+            <div className="mt-6 flex justify-center">
+              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-amber-200 rounded-full border border-amber-300">
+                <div className="text-2xl">💎</div>
+                <div className="text-lg font-bold text-amber-800">
+                  {wallet.diamonds_balance}
+                </div>
+                <div className="text-sm text-amber-600">dijamanata</div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -854,36 +918,7 @@ export default function KvizPage() {
           )}
 
           {/* Leaderboard Section */}
-          <Card className="border-0 shadow-lg bg-gradient-to-r from-amber-50 to-yellow-50">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-amber-800 flex items-center gap-2">
-                <Trophy className="h-5 w-5" />
-                Najbolji rezultati
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {leaderboard.map((entry, index) => (
-                  <div key={entry.id} className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${index === 0 ? 'bg-yellow-100 text-yellow-800' :
-                        index === 1 ? 'bg-gray-100 text-gray-800' :
-                          index === 2 ? 'bg-amber-100 text-amber-800' :
-                            'bg-stone-100 text-stone-600'
-                        }`}>
-                        {index + 1}
-                      </div>
-                      <span className="font-medium text-stone-700">{entry.username}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-amber-700 font-numbers">{entry.score}%</div>
-                      <div className="text-xs text-stone-500">{new Date(entry.date).toLocaleDateString('bs-BA')}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <Leaderboard />
         </div>
       </div>
     </main>

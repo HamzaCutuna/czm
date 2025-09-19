@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +11,11 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Globe, HelpCircle, BookOpen, ChevronDown } from "lucide-react";
+import { useWallet } from "@/components/wallet/WalletProvider";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { RewardCalculator } from "@/components/quiz/RewardCalculator";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 type FlatEvent = {
   Id: number;
@@ -200,32 +204,27 @@ type Session = {
   startTime: number;
 };
 
-function loadSession(): Session | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Session) : null;
-  } catch {
-    return null;
-  }
-}
 
 function saveSession(s: Session) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {}
 }
 
-export default function TrueFalsePage() {
+function TrueFalseGame() {
   const [gameState, setGameState] = useState<GameState>('settings');
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<null | { correct: boolean; explanation?: string }>(null);
-  const [regions, setRegions] = useState<Region[]>([]);
+  const [, setRegions] = useState<Region[]>([]);
   const [settings, setSettings] = useState<GameSettings>({
     questionCount: 10,
     regionId: "all",
     regionName: "Sve regije"
   });
   const liveRef = useRef<HTMLDivElement | null>(null);
+  
+  const { user } = useAuth();
+  const { wallet, refreshWallet } = useWallet();
 
   const regionOptions = [
     { value: "all", label: "Sve regije" },
@@ -324,6 +323,7 @@ export default function TrueFalsePage() {
       ...session,
       score: session.score + (correct ? 1 : 0),
     };
+    
     setFeedback({ correct, explanation: current.explanation });
     setSession(next);
     saveSession(next);
@@ -332,10 +332,98 @@ export default function TrueFalsePage() {
     }, 0);
   }
 
-  function nextQuestion() {
+  async function nextQuestion() {
     if (!session) return;
     const isLast = session.index >= session.questions.length - 1;
     if (isLast) {
+      // Finish the game and award diamonds
+      console.log('Game finished - checking conditions:', {
+        user: !!user,
+        userEmail: user?.email,
+        questionsLength: session.questions.length,
+        score: session.score
+      });
+      
+      if (user && session.questions.length >= 5) {
+        try {
+          const durationMs = Date.now() - session.startTime;
+          
+          console.log('Calling quiz finalize API with:', {
+            totalQuestions: session.questions.length,
+            correctAnswers: session.score,
+            durationMs
+          });
+          
+          // Get the session token for authentication
+          const { data: { session: authSession } } = await supabase.auth.getSession();
+          console.log('Auth session check:', {
+            hasSession: !!authSession,
+            hasToken: !!authSession?.access_token,
+            tokenLength: authSession?.access_token?.length
+          });
+          
+          if (!authSession?.access_token) {
+            console.error('No auth session token available');
+            toast.error('Greška: Niste prijavljeni');
+            return;
+          }
+
+          // Call the new API endpoint with timeout
+          console.log('Making API call to /api/quiz/tf/finalize...');
+          
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+          
+          const response = await fetch('/api/quiz/tf/finalize', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authSession.access_token}`,
+            },
+            body: JSON.stringify({
+              totalQuestions: session.questions.length,
+              correctAnswers: session.score,
+              durationMs,
+              sessionData: { questions: session.questions.map(q => ({ text: q.text, isTrue: q.isTrue })) }
+            }),
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          console.log('API call completed, response status:', response.status);
+          
+          const result = await response.json();
+          
+          console.log('API response:', {
+            ok: response.ok,
+            status: response.status,
+            result
+          });
+          
+          if (!response.ok) {
+            console.error('API error:', result);
+            toast.error(`Error: ${result.error}`);
+          } else if (result.diamondsEarned > 0) {
+            console.log('Diamonds earned:', result.diamondsEarned);
+            toast.success(`+${result.diamondsEarned} 💎 nagrađeno!`);
+            // Refresh wallet to show updated balance
+            await refreshWallet();
+          } else if (result.rewardedToday) {
+            console.log('Already rewarded today');
+            toast.info("Igra završena - već ste dobili nagradu danas");
+          } else {
+            console.log('No reward - conditions not met');
+            toast.info("Igra završena - nema nagrade za ovaj pokušaj");
+          }
+        } catch (error: any) {
+          console.error('API call error:', error);
+          if (error.name === 'AbortError') {
+            toast.error('API call timeout - pokušajte ponovo');
+          } else {
+            toast.error(`Error: ${error.message}`);
+          }
+        }
+      }
       setGameState('finished');
       return;
     }
@@ -351,6 +439,12 @@ export default function TrueFalsePage() {
     setFeedback(null);
     setGameState('settings');
   }
+
+  // Simple powerup functions (no diamond costs)
+  const handleSkip = () => {
+    nextQuestion();
+    toast.success("Pitanje preskočeno!");
+  };
 
   const progress = useMemo(() => {
     if (!session) return { current: 0, total: 0 };
@@ -376,13 +470,6 @@ export default function TrueFalsePage() {
 
   if (gameState === 'finished') {
     const percentage = session ? Math.round((session.score / session.questions.length) * 100) : 0;
-    const getScoreMessage = (score: number, total: number) => {
-      const percentage = Math.round((score / total) * 100);
-      if (percentage >= 90) return "Odličan rezultat! 🏆";
-      if (percentage >= 70) return "Dobar rezultat! 👍";
-      if (percentage >= 50) return "Prosečan rezultat 📚";
-      return "Treba više učenja 📖";
-    };
 
     return (
       <main className="container mx-auto px-4 py-16 bg-[--color-bg]">
@@ -401,6 +488,19 @@ export default function TrueFalsePage() {
                 <div className={`text-6xl font-bold mb-2 ${getScoreColor(percentage)} quiz-score`}>
                   {percentage}%
                 </div>
+                
+                {/* Diamonds Display */}
+                {wallet && (
+                  <div className="mt-4 flex justify-center">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-amber-200 rounded-full border border-amber-300">
+                      <div className="text-xl">💎</div>
+                      <div className="text-lg font-bold text-amber-800">
+                        {wallet.diamonds_balance}
+                      </div>
+                      <div className="text-sm text-amber-600">dijamanata</div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -444,6 +544,18 @@ export default function TrueFalsePage() {
                 Pitanje {progress.current} od {progress.total}
               </span>
             </div>
+          </div>
+
+          {/* Simple Powerups */}
+          <div className="mb-6 flex justify-center gap-2">
+            <Button
+              onClick={handleSkip}
+              variant="outline"
+              size="sm"
+              className="border-stone-300 text-stone-700 hover:bg-stone-100"
+            >
+              Skip pitanje
+            </Button>
           </div>
 
           <Card className="border-0 shadow-2xl bg-gradient-to-br from-amber-50 to-stone-50">
@@ -567,6 +679,19 @@ export default function TrueFalsePage() {
           <p className="text-xl text-stone-600 max-w-2xl mx-auto leading-relaxed">
             Testirajte svoje znanje o historijskim događajima kroz jednostavne izjave
           </p>
+          
+          {/* Diamonds Display */}
+          {wallet && (
+            <div className="mt-6 flex justify-center">
+              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-amber-200 rounded-full border border-amber-300">
+                <div className="text-2xl">💎</div>
+                <div className="text-lg font-bold text-amber-800">
+                  {wallet.diamonds_balance}
+                </div>
+                <div className="text-sm text-amber-600">dijamanata</div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -686,6 +811,11 @@ export default function TrueFalsePage() {
                 </div>
               </div>
 
+              {/* Reward Calculator */}
+              <div className="mt-8">
+                <RewardCalculator questionCount={settings.questionCount} />
+              </div>
+
               {/* Start Button */}
               <div className="text-center pt-6">
                 <Button
@@ -712,6 +842,6 @@ export default function TrueFalsePage() {
   );
 }
 
- 
-
-
+export default function TrueFalsePage() {
+  return <TrueFalseGame />;
+}

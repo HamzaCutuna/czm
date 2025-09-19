@@ -10,7 +10,7 @@ const navItems = [
   { href: "/vremenska-linija", label: "VREMENSKA LINIJA" },
   { href: "/galerija", label: "GALERIJA" },
   { href: "/igre", label: "IGRE" },
-  { href: "/novosti", label: "NOVOSTI" },
+  { href: "/obavjestenja", label: "OBAVJEŠTENJA" },
 ];
 
 interface MainNavProps {

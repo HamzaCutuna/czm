@@ -6,7 +6,6 @@ import { ChevronRight } from "lucide-react";
 import { HeroToday } from "@/components/hero/HeroToday";
 import HistoricalMap from "@/components/map/HistoricalMap";
 import AboutUs from "@/components/about/AboutUs";
-import LatestNews from "@/components/news/LatestNews";
 import { todayInSarajevo } from "@/lib/tz";
 
 export default function Home() {
@@ -40,7 +39,6 @@ export default function Home() {
         </div>
       </div>
       <AboutUs />
-      <LatestNews />
     </>
   );
 }

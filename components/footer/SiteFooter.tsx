@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, Phone, Facebook } from "lucide-react";
+import { Mail, Phone, Facebook, Instagram, Globe } from "lucide-react";
 import Image from "next/image";
 
 const currentYear = new Date().getFullYear();
@@ -11,7 +11,7 @@ const quickLinks = [
   { href: "/kviz", label: "Kviz" },
   { href: "/kalendar", label: "Kalendar" },
   { href: "/vremenska-linija", label: "Vremenska linija" },
-  { href: "/novosti", label: "Novosti" },
+  { href: "/obavjestenja", label: "Obavještenja" },
   { href: "/o-nama", label: "O nama" },
 ];
 
@@ -36,14 +36,17 @@ export function SiteFooter() {
           {/* Brand & Mission */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center space-x-3">
-              <div className="h-16 w-16 rounded-full flex items-center justify-center">
-                <Image src="/images/logo.png" alt="Logo" width={60} height={60} />
-              </div>
-              <span className="text-2xl font-bold text-stone-50 font-heading">Centar za Mir</span>
+              <Image 
+                src="/images/logo-historija.png" 
+                alt="Historija TV" 
+                className="h-16 w-auto object-contain" 
+                width={64} 
+                height={64} 
+              />
             </div>
             
             <p className="text-stone-200 leading-relaxed max-w-md">
-              Centar za mir i multietničku saradnju zamišlja budućnost u kojoj se bolna ratna prošlost pretvara u lekcije pomirenja i jedinstva.
+              Historija TV pruža edukativni sadržaj o historijskim događajima kroz interaktivne igre, kalendar i multimedijalne materijale.
             </p>
             
             <div className="space-y-3 text-stone-200">
@@ -110,18 +113,38 @@ export function SiteFooter() {
         <div className="mt-12 pt-6 border-t border-stone-700/50">
           <div className="flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0">
             <p className="text-stone-300 text-sm">
-              © {currentYear} Centar za mir. Sva prava zadržana.
+              © {currentYear} Centar za mir i multietnicku saradnju Mostar. Sva prava zadržana.
             </p>
             
-            <a
-              href="https://www.facebook.com/centarzamir/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 text-stone-300 hover:text-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-300 focus:ring-offset-2 focus:ring-offset-[#4A2E1A] rounded"
-              aria-label="Pratite nas na Facebook-u"
-            >
-              <Facebook className="h-4 w-4" />
-            </a>
+            <div className="flex items-center gap-2">
+              <a
+                href="https://www.facebook.com/centarzamir/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 text-stone-300 hover:text-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-300 focus:ring-offset-2 focus:ring-offset-[#4A2E1A] rounded"
+                aria-label="Pratite nas na Facebook-u"
+              >
+                <Facebook className="h-4 w-4" />
+              </a>
+              <a
+                href="https://www.instagram.com/centar_za_mir/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 text-stone-300 hover:text-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-300 focus:ring-offset-2 focus:ring-offset-[#4A2E1A] rounded"
+                aria-label="Pratite nas na Instagram-u"
+              >
+                <Instagram className="h-4 w-4" />
+              </a>
+              <a
+                href="https://centarzamir.org.ba/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 text-stone-300 hover:text-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-300 focus:ring-offset-2 focus:ring-offset-[#4A2E1A] rounded"
+                aria-label="Posjetite našu web stranicu"
+              >
+                <Globe className="h-4 w-4" />
+              </a>
+            </div>
           </div>
         </div>
       </div>

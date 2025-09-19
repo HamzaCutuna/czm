@@ -4,8 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { MainNav } from "./MainNav";
-import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { WalletBadge } from "../wallet/WalletBadge";
+import { UserMenu } from "./UserMenu";
+import { useAuth } from "../auth/AuthProvider";
 
 const mobileNavItems = [
   { href: "/o-nama", label: "O NAMA" },
@@ -13,11 +15,12 @@ const mobileNavItems = [
   { href: "/vremenska-linija", label: "VREMENSKA LINIJA" },
   { href: "/galerija", label: "GALERIJA" },
   { href: "/igre", label: "IGRE" },
-  { href: "/novosti", label: "NOVOSTI" },
+  { href: "/obavjestenja", label: "OBAVJEŠTENJA" },
 ];
 
 export function SolidNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -37,16 +40,23 @@ export function SolidNavbar() {
             className="flex items-center space-x-3 focus-ring rounded-md"
             onClick={closeMobileMenu}
           >
-            <div className="h-8 w-8 rounded-full flex items-center justify-center">
-              <Image src="/images/logo.png" alt="Centar za mir" className="h-8 w-8" width={32} height={32} />
-            </div>
-            <span className="text-lg font-semibold text-stone-800 font-heading">
-              Centar za mir
-            </span>
+            <Image 
+              src="/images/logo-crni.png" 
+              alt="Historija TV" 
+              className="h-8 md:h-10 lg:h-12 w-auto object-contain" 
+              width={80} 
+              height={80} 
+              priority
+              quality={100}
+            />
           </Link>
 
           {/* Desktop Navigation */}
-          <MainNav isSolid={true} />
+          <div className="flex items-center gap-4">
+            <MainNav isSolid={true} />
+            <WalletBadge isSolid={true} />
+            <UserMenu isSolid={true} />
+          </div>
 
           {/* Mobile Menu Button */}
           <button

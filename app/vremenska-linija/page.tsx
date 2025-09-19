@@ -233,10 +233,12 @@ function VremenskaLinijaPageContent() {
                 cardTitle: '1rem',
                 title: '1.1rem',
               }}
-              onItemSelect={(item: { title: string }) => {
-                const event = filteredEvents.find(e => e.year.toString() === item.title);
-                if (event) {
-                  handleReadMore(event);
+              onItemSelect={(item) => {
+                if (typeof item === 'object' && item.title) {
+                  const event = filteredEvents.find(e => e.year.toString() === item.title);
+                  if (event) {
+                    handleReadMore(event);
+                  }
                 }
               }}
             />

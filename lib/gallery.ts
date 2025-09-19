@@ -13,7 +13,7 @@ export const galleryFolders: GalleryFolder[] = [
     slug: "genocid-u-srebrenici",
     cover: "/images/gallery/srebrenica-1995/image-1.jpeg",
     subtitle: "Srebrenica 1995",
-    description: "Komemoracija i sjećanje na žrtve genocida u Srebrenici."
+    description: "Sjećanje na žrtve genocida u Srebrenici."
   },
   {
     title: "Opsada Sarajeva",

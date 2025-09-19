@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ConditionalNavbar } from "@/components/navbar/ConditionalNavbar";
 import { SiteFooter } from "@/components/footer/SiteFooter";
+import { AuthProvider } from "@/components/auth/AuthProvider";
+import { WalletProvider } from "@/components/wallet/WalletProvider";
 
 export const metadata: Metadata = {
   title: "TV Kalendar - Historijski događaji",
@@ -41,13 +43,17 @@ export default function RootLayout({
   return (
     <html lang="bs" className="scrollbar-stable">
       <body className="antialiased">
-        <div className="min-h-screen flex flex-col">
-          <ConditionalNavbar />
-          <main className="flex-1 bg-[--color-bg]">
-            {children}
-          </main>
-          <SiteFooter />
-        </div>
+        <AuthProvider>
+          <WalletProvider>
+            <div className="min-h-screen flex flex-col">
+              <ConditionalNavbar />
+              <main className="flex-1 bg-[--color-bg]">
+                {children}
+              </main>
+              <SiteFooter />
+            </div>
+          </WalletProvider>
+        </AuthProvider>
       </body>
     </html>
   );

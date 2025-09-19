@@ -1,45 +1,54 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Images } from "lucide-react";
-import { getGalleryFolderBySlug } from "@/lib/gallery";
+import { getGalleryCategoryById, getGalleryEventByCategoryAndSlug } from "@/lib/galleryData";
 import { getGalleryImages } from "@/lib/fs-gallery";
 import { YouTubeEmbed } from "@/components/ui/youtube-embed";
-import GalleryClient from "@/app/galerija/[slug]/GalleryClient";
+import GalleryClient from "@/app/galerija/[category]/[slug]/GalleryClient";
 
 interface PageProps {
   params: {
+    category: string;
     slug: string;
   };
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const folder = getGalleryFolderBySlug(params.slug);
+  const category = getGalleryCategoryById(params.category);
+  const event = getGalleryEventByCategoryAndSlug(params.category, params.slug);
   
-  if (!folder) {
+  if (!category || !event) {
     return {
       title: "Galerija nije pronađena | TV Kalendar",
     };
   }
 
   return {
-    title: `${folder.title} | Galerija | TV Kalendar`,
-    description: folder.description || `Pregledajte multimediju o ${folder.title.toLowerCase()}.`,
+    title: `${event.title} | ${category.title} | Galerija | TV Kalendar`,
+    description: event.description || `Pregledajte multimediju o ${event.title.toLowerCase()}.`,
   };
 }
 
-export default function GallerySlugPage({ params }: PageProps) {
-  const folder = getGalleryFolderBySlug(params.slug);
+export default function GalleryEventPage({ params }: PageProps) {
+  const category = getGalleryCategoryById(params.category);
+  const event = getGalleryEventByCategoryAndSlug(params.category, params.slug);
   
-  if (!folder) {
+  if (!category || !event) {
     notFound();
   }
 
   // Map slug to actual folder name
   const folderMap: Record<string, string> = {
-    "genocid-u-srebrenici": "srebrenica-1995",
+    "srebrenica-1995": "srebrenica-1995",
     "opsada-sarajeva": "opsada-sarajeva",
     "stari-most": "stari-most",
-    "vukovar-1991": "vukovar-1991"
+    "vukovar-1991": "vukovar-1991",
+    "oluja-1995": "oluja-1995",
+    "nato-bombardovanje-1999": "nato-bombardovanje-1999",
+    "kosovo-1999": "kosovo-1999",
+    "holokaust": "holokaust",
+    "berlinski-zid": "berlinski-zid",
+    "mandela-apartheid": "mandela-apartheid"
   };
   
   const folderName = folderMap[params.slug] || params.slug;
@@ -52,11 +61,11 @@ export default function GallerySlugPage({ params }: PageProps) {
         <div className="max-w-6xl mx-auto">
           {/* Back Button */}
           <Link 
-            href="/galerija" 
+            href={`/galerija/${category.id}`} 
             className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-900 transition-colors mb-8"
           >
             <ArrowLeft className="h-4 w-4" />
-            Nazad na galeriju
+            Nazad na {category.title}
           </Link>
 
           {/* Hero Section */}
@@ -67,14 +76,14 @@ export default function GallerySlugPage({ params }: PageProps) {
               </div>
             </div>
             <h1 className="text-6xl font-bold text-stone-800 mb-4 font-heading tracking-wide">
-              {folder.title}
+              {event.title}
             </h1>
-            {folder.subtitle && (
-              <p className="text-xl text-stone-600 mb-4">{folder.subtitle}</p>
+            {event.subtitle && (
+              <p className="text-xl text-stone-600 mb-4">{event.subtitle}</p>
             )}
-            {folder.description && (
+            {event.description && (
               <p className="text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed">
-                {folder.description}
+                {event.description}
               </p>
             )}
           </div>
@@ -95,7 +104,7 @@ export default function GallerySlugPage({ params }: PageProps) {
           )}
 
           {/* YouTube Video Section */}
-          {params.slug === "genocid-u-srebrenici" && (
+          {params.slug === "srebrenica-1995" && (
             <section>
               <h2 className="text-3xl font-bold text-stone-900 font-heading mb-8">
                 Video materijal
@@ -148,7 +157,7 @@ export default function GallerySlugPage({ params }: PageProps) {
           )}
 
           {/* Text Content - Srebrenica */}
-          {params.slug === "genocid-u-srebrenici" && (
+          {params.slug === "srebrenica-1995" && (
             <section className="prose prose-lg max-w-none">
               <h2 className="text-3xl font-bold text-stone-900 font-heading mb-6">
                 Srebrenica 1995
@@ -343,20 +352,18 @@ export default function GallerySlugPage({ params }: PageProps) {
           )}
 
           {/* Generic content section for other galleries */}
-          {!["genocid-u-srebrenici", "opsada-sarajeva", "stari-most", "vukovar-1991"].includes(params.slug) && (
+          {!["srebrenica-1995", "opsada-sarajeva", "stari-most", "vukovar-1991"].includes(params.slug) && (
             <section className="prose prose-lg max-w-none">
               <h2 className="text-3xl font-bold text-stone-900 font-heading mb-6">
-                O {folder.title.toLowerCase()}
+                O {event.title.toLowerCase()}
               </h2>
               
               <div className="space-y-6 text-stone-700 leading-relaxed">
                 <p>
-                  {/* TODO: Add specific historical content for each event */}
-                  {folder.description}
+                  {event.description}
                 </p>
                 
                 <p>
-                  {/* TODO: Replace with sourced historical content for each specific event */}
                   Detaljni historijski sadržaj o ovom događaju će biti dodan uskoro.
                 </p>
               </div>

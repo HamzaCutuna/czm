@@ -6,6 +6,9 @@ import { Menu, X } from "lucide-react";
 import { MainNav } from "./MainNav";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { WalletBadge } from "../wallet/WalletBadge";
+import { UserMenu } from "./UserMenu";
+import { useAuth } from "../auth/AuthProvider";
 
 const mobileNavItems = [
   { href: "/o-nama", label: "O NAMA" },
@@ -13,19 +16,24 @@ const mobileNavItems = [
   { href: "/vremenska-linija", label: "VREMENSKA LINIJA" },
   { href: "/galerija", label: "GALERIJA" },
   { href: "/igre", label: "IGRE" },
-  { href: "/novosti", label: "NOVOSTI" },
+  { href: "/obavjestenja", label: "OBAVJEŠTENJA" },
 ];
 
 export function Navbar() {
   const [isSolid, setIsSolid] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     const el = document.getElementById("nav-sentinel");
     if (!el) return;
     
     const io = new IntersectionObserver(
-      ([e]) => setIsSolid(!e.isIntersecting), 
+      ([e]) => {
+        setIsSolid(!e.isIntersecting);
+        setIsScrolled(!e.isIntersecting);
+      }, 
       { rootMargin: "-72px 0px 0px 0px" }
     );
     io.observe(el);
@@ -57,25 +65,28 @@ export function Navbar() {
       <div className="container mx-auto px-3 sm:px-4 lg:px-8">
         <div className="flex h-14 items-center justify-between">
           {/* Logo and Brand */}
-          <Link
-            href="/"
-            className="flex items-center space-x-2 sm:space-x-3 focus-ring rounded-md min-w-0 flex-shrink-0"
-            onClick={closeMobileMenu}
-          >
-            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full flex items-center justify-center flex-shrink-0">
-              <Image src="/images/logo.png" alt="Centar za mir" className="h-6 w-6 sm:h-8 sm:w-8" width={32} height={32} />
-            </div>
-            <span className={cn(
-              "text-xs sm:text-lg font-semibold transition-colors duration-300 font-heading truncate",
-              isSolid || isMobileMenuOpen ? "text-stone-800" : "text-white drop-shadow-lg"
-            )}>
-              <span className="hidden xs:inline">Centar za mir</span>
-              <span className="xs:hidden">CZM</span>
-            </span>
-          </Link>
+        <Link
+          href="/"
+          className="flex items-center space-x-2 sm:space-x-3 focus-ring rounded-md min-w-0 flex-shrink-0"
+          onClick={closeMobileMenu}
+        >
+          <Image 
+            src={isScrolled ? "/images/logo-crni.png" : "/images/logo-historija.png"} 
+            alt="Historija TV" 
+            className="h-8 md:h-10 lg:h-12 w-auto object-contain" 
+            width={80} 
+            height={80} 
+            priority
+            quality={100}
+          />
+        </Link>
 
           {/* Desktop Navigation */}
-          <MainNav isSolid={isSolid} />
+          <div className="flex items-center gap-4">
+            <MainNav isSolid={isSolid} />
+            <WalletBadge isSolid={isSolid} />
+            <UserMenu isSolid={isSolid} />
+          </div>
 
           {/* Mobile Menu Button */}
           <button
