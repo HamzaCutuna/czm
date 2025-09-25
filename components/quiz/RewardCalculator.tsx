@@ -15,7 +15,7 @@ interface RewardCalculatorProps {
 export function RewardCalculator({ questionCount, expectedAccuracy = 80 }: RewardCalculatorProps) {
   const [showInfo, setShowInfo] = useState(false);
   
-  const expectedCorrect = Math.floor(questionCount * (expectedAccuracy / 100));
+  const expectedCorrect = Math.round(questionCount * (expectedAccuracy / 100));
   const expectedReward = getExpectedReward(questionCount, expectedAccuracy);
   
   return (

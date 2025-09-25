@@ -6,15 +6,9 @@ import { AuthProvider } from "@/components/auth/AuthProvider";
 import { WalletProvider } from "@/components/wallet/WalletProvider";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: "TV Kalendar - Historijski događaji",
   description: "Digitalno očuvanje kulturnog i historijskog naslijeđa kroz interaktivnu web platformu",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover",
-  },
   openGraph: {
     title: "TV Kalendar - Historijski događaji",
     description: "Digitalno očuvanje kulturnog i historijskog naslijeđa kroz interaktivnu web platformu",
@@ -33,6 +27,14 @@ export const metadata: Metadata = {
     description: "Digitalno očuvanje kulturnog i historijskog naslijeđa kroz interaktivnu web platformu",
     images: ["/images/og-image.jpg"],
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

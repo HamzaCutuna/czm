@@ -12,6 +12,7 @@ interface EventModalProps {
   event: NaDanasnjiDanResponseDogadaj | null;
   isOpen: boolean;
   onClose: () => void;
+  selectedDate?: Date;
 }
 
 // Helper function to get region color
@@ -34,7 +35,7 @@ function createShortTitle(description: string): string {
   return description.substring(0, 60) + '...';
 }
 
-export function EventModal({ event, isOpen, onClose }: EventModalProps) {
+export function EventModal({ event, isOpen, onClose, selectedDate = new Date() }: EventModalProps) {
   if (!event) return null;
 
   const img = pickImageUrl(event.slike);
@@ -101,30 +102,27 @@ export function EventModal({ event, isOpen, onClose }: EventModalProps) {
                 )}
 
                 {/* Content section */}
-                <div className="px-6 py-6">
-                  {/* Badges */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-stone-500" />
-                      <span className="bg-[--color-secondary]/90 text-stone-800 text-sm px-3 py-1 rounded-full font-semibold">
-                        {event.godina}
+                <div className="px-6 py-6 max-h-[60vh] overflow-y-auto">
+                  {/* Full Date */}
+                  <div className="mb-6 p-4 bg-stone-50 rounded-lg border border-stone-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="h-5 w-5 text-stone-600" />
+                      <span className="text-lg font-semibold text-stone-800">
+                        {event.godina} {String(selectedDate.getMonth() + 1).padStart(2, '0')} {String(selectedDate.getDate()).padStart(2, '0')}
                       </span>
                     </div>
-                                         <div className="flex items-center gap-2">
-                       <MapPin className="h-4 w-4 text-stone-500" />
-                       <span className={cn(
-                         "text-sm px-3 py-1 rounded-full font-semibold shadow-md border border-white/20",
-                         getRegionColor(event.regija)
-                       )}>
-                         {event.regija}
-                       </span>
-                     </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-stone-500" />
+                        <span className={cn(
+                          "text-sm px-3 py-1 rounded-full font-semibold shadow-md border border-white/20",
+                          getRegionColor(event.regija)
+                        )}>
+                          {event.regija}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-
-                  {/* Title */}
-                  <Dialog.Title as="h2" className="text-2xl font-bold text-stone-800 mb-4 font-body leading-tight truncate">
-                    {createShortTitle(event.opis)}
-                  </Dialog.Title>
 
                   {/* Description */}
                   <div className="prose prose-stone max-w-none mb-6">

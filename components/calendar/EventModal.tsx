@@ -7,33 +7,34 @@ interface EventModalProps {
   open: boolean;
   event: CalendarEvent | null;
   onOpenChange: (open: boolean) => void;
+  selectedDate?: Date;
 }
 
-export default function EventModal({ open, event, onOpenChange }: EventModalProps) {
+export default function EventModal({ open, event, onOpenChange, selectedDate = new Date() }: EventModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl bg-white">
         {event && (
           <div className="bg-white">
             <DialogHeader>
-              <div className="flex items-center gap-3 mb-2">
+              <DialogTitle className="sr-only">
+                Historijski događaj - {event.year} {String(selectedDate.getMonth() + 1).padStart(2, '0')} {String(selectedDate.getDate()).padStart(2, '0')}
+              </DialogTitle>
+              <div className="flex items-center gap-3 mb-4">
                 <span className="px-3 py-1 text-sm rounded-full font-semibold bg-stone-100 text-stone-800 border border-stone-200">
-                  {event.year}
+                  {event.year} {String(selectedDate.getMonth() + 1).padStart(2, '0')} {String(selectedDate.getDate()).padStart(2, '0')}
                 </span>
                 <span className="px-3 py-1 text-sm rounded-full font-semibold bg-[--color-primary] text-white">
                   {event.category}
                 </span>
               </div>
-              <DialogTitle className="text-xl font-semibold text-stone-900 line-clamp-1">
-                {event.title}
-              </DialogTitle>
             </DialogHeader>
             {event.imageUrl && (
               <div className="mt-3 rounded-xl overflow-hidden bg-stone-100 max-h-96">
                 <img src={event.imageUrl} alt={event.title} className="w-full h-auto object-cover max-h-96" />
               </div>
             )}
-            <div className="mt-4 prose prose-stone max-w-none text-stone-800">
+            <div className="mt-4 prose prose-stone max-w-none text-stone-800 max-h-96 overflow-y-auto">
               <p>{event.fullText}</p>
             </div>
           </div>

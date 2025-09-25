@@ -38,7 +38,7 @@ export default function IgrePage() {
               <Gamepad2 className="h-12 w-12 text-amber-700" />
             </div>
           </div>
-          <h1 className="text-6xl font-bold text-stone-800 mb-4 font-heading tracking-wide">Igre</h1>
+          <h1 className="text-6xl font-bold text-stone-800 mb-4 font-heading tracking-wide">Kvizovi</h1>
           <p className="text-xl text-stone-600 max-w-2xl mx-auto leading-relaxed">
             Zabavne i edukativne igre i izazovi. Odaberite igru i započnite.
           </p>

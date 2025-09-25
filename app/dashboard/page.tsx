@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,15 +14,43 @@ import {
   ArrowRight,
   Calendar,
   TrendingUp,
-  Award
+  Award,
+  User,
+  Clock,
+  CheckCircle,
+  LogOut
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+
+interface Profile {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  diamond_balance: number;
+  created_at: string;
+}
+
+interface QuizResult {
+  id: string;
+  quiz_key: string;
+  score_percent: number;
+  correct_count: number;
+  total_count: number;
+  duration_ms: number;
+  created_at: string;
+}
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const { wallet, transactions, loading: walletLoading } = useWallet();
   const router = useRouter();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -30,7 +58,111 @@ export default function DashboardPage() {
     }
   }, [user, authLoading, router]);
 
-  if (authLoading || walletLoading) {
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (!user) return;
+      
+      try {
+        
+        // Fetch profile
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('Profile error:', profileError);
+          // If it's a permission error, try to create profile anyway
+          if (profileError.code === '42501' || profileError.message?.includes('permission')) {
+            console.log('Permission error detected, attempting to create profile...');
+            const { data: newProfile, error: createError } = await supabase
+              .from('profiles')
+              .insert({
+                id: user.id,
+                full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
+                avatar_url: user.user_metadata?.avatar_url || null,
+                diamond_balance: 0
+              })
+              .select()
+              .single();
+            
+            if (createError) {
+              console.error('Create profile error:', createError);
+            } else {
+              setProfile(newProfile);
+            }
+          }
+        } else if (profileData) {
+          setProfile(profileData);
+        } else if (profileError?.code === 'PGRST116') {
+          // Profile doesn't exist, create one
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: user.id,
+              full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
+              avatar_url: user.user_metadata?.avatar_url || null,
+              diamond_balance: 0
+            })
+            .select()
+            .single();
+          
+          if (createError) {
+            console.error('Create profile error:', createError);
+            // If profile creation fails, create a fallback profile
+            setProfile({
+              id: user.id,
+              full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
+              avatar_url: user.user_metadata?.avatar_url || null,
+              diamond_balance: 0,
+              created_at: new Date().toISOString()
+            });
+          } else {
+            setProfile(newProfile);
+          }
+        }
+        
+        // Fetch quiz results
+        const { data: quizData, error: quizError } = await supabase
+          .from('quiz_results')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (quizError) {
+          console.error('Quiz results error:', quizError);
+          // If it's a permission error or table doesn't exist, just set empty array
+          if (quizError.code === '42501' || quizError.code === '42P01' || quizError.message?.includes('permission') || quizError.message?.includes('does not exist')) {
+            console.log('Quiz results table not accessible, setting empty array');
+            setQuizResults([]);
+          }
+        } else {
+          setQuizResults(quizData || []);
+        }
+      } catch (error) {
+        console.error('Dashboard data fetch error:', error);
+        // Set fallback profile if everything fails
+        if (!profile) {
+          setProfile({
+            id: user.id,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
+            avatar_url: user.user_metadata?.avatar_url || null,
+            diamond_balance: 0,
+            created_at: new Date().toISOString()
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
+
+  if (authLoading || walletLoading || loading) {
     return (
       <main className="min-h-dvh bg-[--color-bg] text-stone-800 flex items-center justify-center">
         <div className="text-center">
@@ -45,6 +177,25 @@ export default function DashboardPage() {
     return null; // Will redirect
   }
 
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+        toast.error('Greška pri odjavi');
+      } else {
+        toast.success('Uspešno ste se odjavili');
+        router.push('/');
+      }
+    } catch (err) {
+      console.error('Sign out failed:', err);
+      toast.error('Greška pri odjavi');
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('bs-BA', {
       day: '2-digit',
@@ -55,6 +206,12 @@ export default function DashboardPage() {
     });
   };
 
+  const formatDuration = (ms: number) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   const recentTransactions = transactions.slice(0, 10);
 
   return (
@@ -63,16 +220,38 @@ export default function DashboardPage() {
       <div className="container mx-auto px-4 pt-20 pb-8">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
-            <div className="p-4 bg-gradient-to-br from-blue-100 to-purple-200 rounded-full shadow-lg">
-              <Gem className="h-12 w-12 text-blue-700" />
+            <div className="p-4 bg-gradient-to-br from-amber-100 to-stone-200 rounded-full shadow-lg">
+              {profile?.avatar_url ? (
+                <img 
+                  src={profile.avatar_url} 
+                  alt="Profile" 
+                  className="h-12 w-12 rounded-full object-cover"
+                />
+              ) : (
+                <User className="h-12 w-12 text-amber-700" />
+              )}
             </div>
           </div>
           <h1 className="text-6xl font-bold text-stone-800 mb-4 font-heading tracking-wide">
             Dashboard
           </h1>
           <p className="text-xl text-stone-600 max-w-2xl mx-auto leading-relaxed">
-            Dobrodošli, {user.email?.split('@')[0]}!
+            Dobrodošli, {profile?.full_name || user.email?.split('@')[0]}!
           </p>
+          <p className="text-lg text-stone-500 mt-2">
+            {user.email}
+          </p>
+          <div className="mt-6 flex justify-center">
+            <Button
+              onClick={handleSignOut}
+              disabled={signingOut}
+              variant="outline"
+              className="flex items-center gap-2 px-6 py-3 border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400 transition-all duration-200"
+            >
+              <LogOut className="h-4 w-4" />
+              {signingOut ? 'Odjavljivanje...' : 'Odjavi se'}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -82,14 +261,14 @@ export default function DashboardPage() {
           <Card className="border-0 shadow-2xl bg-gradient-to-br from-blue-50 to-purple-50 mb-8">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl font-bold text-blue-800 mb-2 font-heading">
-                Vaš balans
+                Ukupni balans dijamanata
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Gem className="h-8 w-8 text-blue-600" />
-                <span className="text-4xl font-bold text-blue-700">{wallet?.diamonds_balance || 0}</span>
-                <span className="text-xl text-blue-600"></span>
+                <span className="text-4xl font-bold text-blue-700">{profile?.diamond_balance || wallet?.diamonds_balance || 0}</span>
+                <span className="text-xl text-blue-600">💎</span>
               </div>
               <p className="text-blue-600">
                 Ukupno transakcija: <span className="font-semibold">{transactions.length}</span>
@@ -97,139 +276,69 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Link href="/igre/kviz">
-              <Card className="border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300 cursor-pointer group">
-                <CardContent className="p-6 text-center">
-                  <div className="flex justify-center mb-4">
-                    <div className="p-3 bg-gradient-to-br from-green-100 to-green-200 rounded-full group-hover:scale-110 transition-transform">
-                      <Play className="h-8 w-8 text-green-700" />
-                    </div>
-                  </div>
-                  <h3 className="text-lg font-bold text-stone-800 mb-2 font-heading">
-                    Kviz
-                  </h3>
-                  <p className="text-stone-600 text-sm">
-                    Testirajte svoje znanje
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/igre/dnevni-izazov">
-              <Card className="border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300 cursor-pointer group">
-                <CardContent className="p-6 text-center">
-                  <div className="flex justify-center mb-4">
-                    <div className="p-3 bg-gradient-to-br from-amber-100 to-amber-200 rounded-full group-hover:scale-110 transition-transform">
-                      <Target className="h-8 w-8 text-amber-700" />
-                    </div>
-                  </div>
-                  <h3 className="text-lg font-bold text-stone-800 mb-2 font-heading">
-                    Dnevni izazov
-                  </h3>
-                  <p className="text-stone-600 text-sm">
-                    Dobijte dnevni bonus
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/igre/tacno-netacno">
-              <Card className="border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300 cursor-pointer group">
-                <CardContent className="p-6 text-center">
-                  <div className="flex justify-center mb-4">
-                    <div className="p-3 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full group-hover:scale-110 transition-transform">
-                      <Award className="h-8 w-8 text-purple-700" />
-                    </div>
-                  </div>
-                  <h3 className="text-lg font-bold text-stone-800 mb-2 font-heading">
-                    Tačno/Netačno
-                  </h3>
-                  <p className="text-stone-600 text-sm">
-                    Jedan nagrađeni pokušaj dnevno
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/kalendar">
-              <Card className="border-0 shadow-lg bg-white hover:shadow-xl transition-all duration-300 cursor-pointer group">
-                <CardContent className="p-6 text-center">
-                  <div className="flex justify-center mb-4">
-                    <div className="p-3 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full group-hover:scale-110 transition-transform">
-                      <Calendar className="h-8 w-8 text-blue-700" />
-                    </div>
-                  </div>
-                  <h3 className="text-lg font-bold text-stone-800 mb-2 font-heading">
-                    Kalendar
-                  </h3>
-                  <p className="text-stone-600 text-sm">
-                    Historijski događaji
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
-
-          {/* Transaction History */}
+          {/* Quiz Results Table */}
           <Card className="border-0 shadow-2xl bg-gradient-to-br from-stone-50 to-amber-50">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-2xl font-bold text-stone-800 font-heading flex items-center gap-2">
-                  <History className="h-6 w-6 text-amber-700" />
-                  Nedavne transakcije
+                  <CheckCircle className="h-6 w-6 text-amber-700" />
+                  Rezultati kvizova
                 </CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              {recentTransactions.length === 0 ? (
+              {quizResults.length === 0 ? (
                 <div className="text-center py-8">
-                  <TrendingUp className="h-16 w-16 text-stone-400 mx-auto mb-4" />
+                  <Play className="h-16 w-16 text-stone-400 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-stone-600 mb-2">
-                    Nema transakcija
+                    Nema rezultata kvizova
                   </h3>
                   <p className="text-stone-500">
-                    Počnite igrati da zaradite svoje prve 💎!
+                    Počnite igrati kvizove da vidite svoje rezultate!
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {recentTransactions.map((transaction) => (
-                    <div
-                      key={transaction.id}
-                      className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-full ${
-                          transaction.direction === 'earn'
-                            ? 'bg-green-100'
-                            : 'bg-red-100'
-                        }`}>
-                          <Gem className={`h-4 w-4 ${
-                            transaction.direction === 'earn' 
-                              ? 'text-green-600' 
-                              : 'text-red-600'
-                          }`} />
-                        </div>
-                        <div>
-                          <p className="font-medium text-stone-800">
-                            {transaction.source}
-                          </p>
-                          <p className="text-sm text-stone-500">
-                            {formatDate(transaction.created_at)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className={`font-semibold ${
-                        transaction.direction === 'earn' 
-                          ? 'text-green-600' 
-                          : 'text-red-600'
-                      }`}>
-                        {transaction.direction === 'earn' ? '+' : '-'}{transaction.amount} 💎
-                      </div>
-                    </div>
-                  ))}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-stone-200">
+                        <th className="text-left py-3 px-4 font-semibold text-stone-700">Kviz</th>
+                        <th className="text-left py-3 px-4 font-semibold text-stone-700">Rezultat</th>
+                        <th className="text-left py-3 px-4 font-semibold text-stone-700">Tačno/Ukupno</th>
+                        <th className="text-left py-3 px-4 font-semibold text-stone-700">Trajanje</th>
+                        <th className="text-left py-3 px-4 font-semibold text-stone-700">Datum</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {quizResults.map((result) => (
+                        <tr key={result.id} className="border-b border-stone-100 hover:bg-white/50">
+                          <td className="py-3 px-4 font-medium text-stone-800">
+                            {result.quiz_key}
+                          </td>
+                          <td className="py-3 px-4">
+                            <Badge 
+                              variant={result.score_percent >= 80 ? "default" : result.score_percent >= 60 ? "secondary" : "destructive"}
+                              className="font-semibold"
+                            >
+                              {result.score_percent.toFixed(1)}%
+                            </Badge>
+                          </td>
+                          <td className="py-3 px-4 text-stone-600">
+                            {result.correct_count}/{result.total_count}
+                          </td>
+                          <td className="py-3 px-4 text-stone-600">
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {formatDuration(result.duration_ms)}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-stone-600">
+                            {formatDate(result.created_at)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </CardContent>

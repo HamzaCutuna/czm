@@ -505,7 +505,7 @@ export default function KvizPage() {
 
                         </div>
 
-                        <h3 className="text-lg font-semibold text-stone-800 mb-4 leading-relaxed font-['Baskervville']">
+                        <h3 className="text-lg font-semibold text-stone-800 mb-4 leading-relaxed">
                           {question.tekstPitanja}
                         </h3>
 
@@ -514,7 +514,7 @@ export default function KvizPage() {
                               ? 'border-green-200 bg-green-50'
                               : 'border-red-200 bg-red-50'
                             }`}>
-                            <h4 className="font-semibold text-stone-700 mb-2 font-['Baskervville']">Vaš odgovor:</h4>
+                            <h4 className="font-semibold text-stone-700 mb-2">Vaš odgovor:</h4>
                             <p className={`font-medium ${isCorrect ? 'text-green-800' : 'text-red-800'
                               }`}>
                               {userAnswerText}
@@ -522,7 +522,7 @@ export default function KvizPage() {
                           </div>
 
                           <div className="p-4 rounded-lg border-2 border-amber-200 bg-amber-50">
-                            <h4 className="font-semibold text-stone-700 mb-2 font-['Baskervville']">Tačan odgovor:</h4>
+                            <h4 className="font-semibold text-stone-700 mb-2">Tačan odgovor:</h4>
                             <p className="font-medium text-amber-800">
                               {correctAnswerText}
                             </p>
@@ -606,7 +606,7 @@ export default function KvizPage() {
 
               {/* Answer Options */}
               <div className="space-y-3">
-                <h4 className="font-semibold font-['Baskervville']">Odaberite odgovor:</h4>
+                <h4 className="font-semibold">Odaberite odgovor:</h4>
                 {currentQuestion.odgovori
                   .filter(answer => !removedOptions.includes(answer.id))
                   .map((answer) => {
@@ -671,7 +671,7 @@ export default function KvizPage() {
                   <Button
                     onClick={confirmAnswer}
                     disabled={selectedAnswer === null}
-                    className="inline-flex items-center justify-center rounded-xl px-6 py-2.5 bg-[#5B2323] text-white shadow-md hover:shadow-lg hover:from-amber-600 hover:via-amber-700 hover:to-amber-800 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 active:scale-[.99] disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
+                    className="inline-flex items-center justify-center rounded-xl px-4 sm:px-6 py-2.5 bg-[#5B2323] text-white shadow-md hover:shadow-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 active:scale-[.99] disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 max-w-full"
                   >
                     Potvrdi
                   </Button>
@@ -679,9 +679,11 @@ export default function KvizPage() {
                   <Button
                     onClick={nextQuestion}
                     className="bg-[#5B2323] text-white rounded-xl shadow-lg hover:bg-[#4a1e1e] 
-                             hover:shadow-xl transition-all duration-200 text-white px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                             hover:shadow-xl transition-all duration-200 text-white px-4 sm:px-8 py-2.5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 max-w-full"
                   >
-                    {currentQuestionIndex < questions.length - 1 ? 'Sljedeće pitanje' : 'Završi kviz'}
+                    <span className="truncate">
+                      {currentQuestionIndex < questions.length - 1 ? 'Sljedeće pitanje' : 'Završi kviz'}
+                    </span>
                   </Button>
                 )}
               </div>
@@ -734,22 +736,14 @@ export default function KvizPage() {
             </div>
           )}
 
-          {/* Main Quiz Card */}
-          <Card className="border-0 shadow-2xl bg-gradient-to-br from-amber-50 to-stone-50 mb-8">
-            <CardHeader className="text-center pb-6">
-              <CardTitle className="text-3xl font-bold text-stone-800 font-serif mb-4">
+          {/* Main Quiz Settings */}
+          <div className="mb-8">
+            <div className="text-center pb-6">
+              <h2 className="text-3xl font-bold text-stone-800 font-serif mb-4">
                 Postavke kviza
-              </CardTitle>
-              {/* Decorative Divider */}
-              <div className="flex items-center justify-center my-6">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
-                <div className="mx-4 p-2 bg-amber-100 rounded-full">
-                  <BookOpen className="h-5 w-5 text-amber-700" />
-                </div>
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-8 px-8 pb-8">
+              </h2>
+            </div>
+            <div className="space-y-8 px-8 pb-8">
               <div className="max-w-md mx-auto space-y-8">
                 {/* Region Selection */}
                 <div className="text-center">
@@ -762,7 +756,7 @@ export default function KvizPage() {
                       <DropdownMenuTrigger asChild>
                         <Button 
                           variant="outline" 
-                          className="h-12 bg-white border-2 border-amber-200 hover:border-amber-400 w-64 justify-between"
+                          className="h-12 bg-white w-64 justify-between"
                         >
                           <span className="flex items-center gap-2">
                             <Globe className="h-4 w-4" />
@@ -772,7 +766,7 @@ export default function KvizPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
-                        className="w-64 bg-white border-2 border-amber-200 shadow-lg"
+                        className="w-64 bg-white shadow-lg"
                         align="center"
                         sideOffset={4}
                         side="bottom"
@@ -804,7 +798,7 @@ export default function KvizPage() {
                       <DropdownMenuTrigger asChild>
                         <Button 
                           variant="outline" 
-                          className="h-12 bg-white border-2 border-amber-200 hover:border-amber-400 w-64 justify-between"
+                          className="h-12 bg-white w-64 justify-between"
                         >
                           <span className="flex items-center gap-2">
                             <HelpCircle className="h-4 w-4" />
@@ -814,7 +808,7 @@ export default function KvizPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
-                        className="w-64 bg-white border-2 border-amber-200 shadow-lg"
+                        className="w-64 bg-white shadow-lg"
                         align="center"
                         sideOffset={4}
                         side="bottom"
@@ -844,7 +838,7 @@ export default function KvizPage() {
                   onClick={startQuiz}
                   disabled={loading}
                   className="bg-[#5B2323] text-white rounded-xl shadow-lg hover:bg-[#4a1e1e] 
-                             hover:shadow-xl transition-all duration-200 text-white px-16 py-4 text-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-2 border-amber-600"
+                             hover:shadow-xl transition-all duration-200 text-white px-8 sm:px-16 py-4 text-lg sm:text-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-2 border-amber-600 max-w-full mx-auto"
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">
@@ -856,37 +850,9 @@ export default function KvizPage() {
                   )}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Fun Fact Section */}
-          {funFact && (
-            <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50 mb-6">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-blue-100 rounded-full">
-                    <Star className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-blue-800 mb-2">Zanimljivost</h3>
-                    <p className="text-blue-700 italic leading-relaxed">
-                      {funFact.opisDogadjaja}
-                    </p>
-                    <div className="flex items-center gap-2 mt-3 text-sm text-blue-600">
-                      <Clock className="h-4 w-4" />
-                      <span>{new Date(funFact.datum).toLocaleDateString('bs-BA')}</span>
-                      {funFact.regijaNaziv && (
-                        <>
-                          <span>•</span>
-                          <span>{funFact.regijaNaziv}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Sample Question Preview */}
           {sampleQuestion && (

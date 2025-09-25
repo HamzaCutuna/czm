@@ -6,24 +6,14 @@ import { Menu, X } from "lucide-react";
 import { MainNav } from "./MainNav";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { WalletBadge } from "../wallet/WalletBadge";
 import { UserMenu } from "./UserMenu";
-import { useAuth } from "../auth/AuthProvider";
+import { AnimatedMobileMenu } from "./AnimatedMobileMenu";
 
-const mobileNavItems = [
-  { href: "/o-nama", label: "O NAMA" },
-  { href: "/kalendar", label: "KALENDAR" },
-  { href: "/vremenska-linija", label: "VREMENSKA LINIJA" },
-  { href: "/galerija", label: "GALERIJA" },
-  { href: "/igre", label: "IGRE" },
-  { href: "/obavjestenja", label: "OBAVJEŠTENJA" },
-];
 
 export function Navbar() {
   const [isSolid, setIsSolid] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user } = useAuth();
 
   useEffect(() => {
     const el = document.getElementById("nav-sentinel");
@@ -71,7 +61,7 @@ export function Navbar() {
           onClick={closeMobileMenu}
         >
           <Image 
-            src={isScrolled ? "/images/logo-crni.png" : "/images/logo-historija.png"} 
+            src={isScrolled || isMobileMenuOpen ? "/images/logo-crni.png" : "/images/logo-historija.png"} 
             alt="Historija TV" 
             className="h-8 md:h-10 lg:h-12 w-auto object-contain" 
             width={80} 
@@ -84,8 +74,9 @@ export function Navbar() {
           {/* Desktop Navigation */}
           <div className="flex items-center gap-4">
             <MainNav isSolid={isSolid} />
-            <WalletBadge isSolid={isSolid} />
-            <UserMenu isSolid={isSolid} />
+            <div className="hidden md:block">
+              <UserMenu isSolid={isSolid} />
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -111,30 +102,11 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div
-          id="mobile-menu"
-          className="md:hidden bg-[#F6F1E7]/95 backdrop-blur-xl border-t border-stone-300/50 shadow-lg"
-          role="navigation"
-          aria-label="Mobilna navigacija"
-        >
-          <div className="container mx-auto px-4 py-4">
-            <nav className="flex flex-col space-y-2">
-              {mobileNavItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="block px-4 py-3 text-base font-medium text-stone-800 hover:text-[--color-primary] hover:bg-white/30 rounded-md transition-colors focus-ring font-heading"
-                  onClick={closeMobileMenu}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </div>
-      )}
+      {/* Animated Mobile Menu */}
+      <AnimatedMobileMenu 
+        isOpen={isMobileMenuOpen} 
+        onClose={closeMobileMenu} 
+      />
     </header>
   );
 }

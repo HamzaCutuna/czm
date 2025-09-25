@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: '**' }, // for quick debug; tighten later
     ],
+    qualities: [25, 50, 75, 100],
   },
 };
 

@@ -13,7 +13,6 @@ import {
 import { Globe, HelpCircle, BookOpen, ChevronDown } from "lucide-react";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { RewardCalculator } from "@/components/quiz/RewardCalculator";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -579,7 +578,7 @@ function TrueFalseGame() {
             <CardContent className="space-y-6">
               {/* Answer Options */}
               <div className="space-y-3">
-                <h4 className="font-semibold font-['Baskervville']">Odaberite odgovor:</h4>
+                <h4 className="font-semibold">Odaberite odgovor:</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button
                     onClick={() => answer(true)}
@@ -705,22 +704,14 @@ function TrueFalseGame() {
             </div>
           )}
 
-          {/* Main Game Card */}
-          <Card className="border-0 shadow-2xl bg-gradient-to-br from-amber-50 to-stone-50 mb-8">
-            <CardHeader className="text-center pb-6">
-              <CardTitle className="text-3xl font-bold text-stone-800 font-serif mb-4">
+          {/* Main Game Settings */}
+          <div className="mb-8">
+            <div className="text-center pb-6">
+              <h2 className="text-3xl font-bold text-stone-800 font-serif mb-4">
                 Postavke igre
-              </CardTitle>
-              {/* Decorative Divider */}
-              <div className="flex items-center justify-center my-6">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
-                <div className="mx-4 p-2 bg-amber-100 rounded-full">
-                  <BookOpen className="h-5 w-5 text-amber-700" />
-                </div>
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-8 px-8 pb-8">
+              </h2>
+            </div>
+            <div className="space-y-8 px-8 pb-8">
               <div className="max-w-md mx-auto space-y-8">
                 {/* Region Selection */}
                 <div className="text-center">
@@ -733,7 +724,7 @@ function TrueFalseGame() {
                       <DropdownMenuTrigger asChild>
                         <Button 
                           variant="outline" 
-                          className="h-12 bg-white border-2 border-amber-200 hover:border-amber-400 w-64 justify-between"
+                          className="h-12 bg-white w-64 justify-between"
                         >
                           <span className="flex items-center gap-2">
                             <Globe className="h-4 w-4" />
@@ -743,7 +734,7 @@ function TrueFalseGame() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
-                        className="w-64 bg-white border-2 border-amber-200 shadow-lg"
+                        className="w-64 bg-white shadow-lg"
                         align="center"
                         sideOffset={4}
                         side="bottom"
@@ -779,7 +770,7 @@ function TrueFalseGame() {
                       <DropdownMenuTrigger asChild>
                         <Button 
                           variant="outline" 
-                          className="h-12 bg-white border-2 border-amber-200 hover:border-amber-400 w-64 justify-between"
+                          className="h-12 bg-white w-64 justify-between"
                         >
                           <span className="flex items-center gap-2">
                             <HelpCircle className="h-4 w-4" />
@@ -789,7 +780,7 @@ function TrueFalseGame() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
-                        className="w-64 bg-white border-2 border-amber-200 shadow-lg"
+                        className="w-64 bg-white shadow-lg"
                         align="center"
                         sideOffset={4}
                         side="bottom"
@@ -811,18 +802,13 @@ function TrueFalseGame() {
                 </div>
               </div>
 
-              {/* Reward Calculator */}
-              <div className="mt-8">
-                <RewardCalculator questionCount={settings.questionCount} />
-              </div>
-
               {/* Start Button */}
               <div className="text-center pt-6">
                 <Button
                   onClick={startGame}
                   disabled={loading}
                   className="bg-[#5B2323] text-white rounded-xl shadow-lg hover:bg-[#4a1e1e] 
-                             hover:shadow-xl transition-all duration-200 text-white px-16 py-4 text-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-2 border-amber-600"
+                             hover:shadow-xl transition-all duration-200 text-white px-8 sm:px-16 py-4 text-lg sm:text-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-2 border-amber-600 max-w-full mx-auto"
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">
@@ -834,8 +820,8 @@ function TrueFalseGame() {
                   )}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </main>

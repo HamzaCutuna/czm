@@ -3,10 +3,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Target, Heart, Award, MapPin, Phone, Mail, Globe } from "lucide-react";
+import { SolidNavbar } from "@/components/navbar/SolidNavbar";
 
 export default function ONamaPage() {
   return (
-    <main className="min-h-dvh bg-[--color-bg] text-stone-800">
+    <div className="min-h-screen flex flex-col">
+      <SolidNavbar />
+      <main className="min-h-dvh bg-[--color-bg] text-stone-800 flex-1">
       {/* Hero Section */}
       <div className="container mx-auto px-4 pt-20 pb-8">
         <div className="text-center mb-12">
@@ -39,7 +42,7 @@ export default function ONamaPage() {
                  <h2 className="text-2xl font-bold text-stone-800 mb-6 font-heading">
                    Naša misija
                  </h2>
-                 <p className="text-stone-600 leading-relaxed font-['Baskervville']">
+                 <p className="text-stone-600 leading-relaxed">
                    Spriječiti da se zaboravi zlo kroz koje su prošli građani Mostara i Hercegovine svih nacionalnosti, 
                    te da istina o istom bude nezaboravno svedočanstvo i opomena budućim generacijama.
                  </p>
@@ -47,17 +50,17 @@ export default function ONamaPage() {
              </Card>
 
              {/* Vision Statement */}
-             <Card className="border-0 shadow-2xl bg-gradient-to-br from-green-100 to-emerald-100 overflow-hidden rounded-xl">
+             <Card className="border-0 shadow-2xl bg-white overflow-hidden rounded-xl">
                <CardContent className="p-8 text-center">
                  <div className="flex justify-center mb-6">
                    <div className="p-3 bg-blue-100 rounded-full">
-                     <Globe className="h-8 w-8 text-green-700" />
+                     <Globe className="h-8 w-8 text-blue-700" />
                    </div>
                  </div>
-                 <h2 className="text-2xl font-bold text-green-800 mb-6 font-heading">
+                 <h2 className="text-2xl font-bold text-stone-800 mb-6 font-heading">
                    Naša vizija
                  </h2>
-                 <p className="text-green-600 leading-relaxed font-['Baskervville']">
+                 <p className="text-stone-600 leading-relaxed">
                    Naša iskrena namjera je promovisanje razvoja multietničkog društva u Bosni i Hercegovini i na 
                    prostorima bivše Jugoslavije, uz otvoreni dijalog prema svim stranama.
                  </p>
@@ -74,10 +77,10 @@ export default function ONamaPage() {
                 <h2 className="text-3xl font-bold text-stone-800 mb-6 font-heading">
                   Historija
                 </h2>
-                <p className="text-stone-600 leading-relaxed mb-6 font-['Baskervville']">
+                <p className="text-stone-600 leading-relaxed mb-6">
                 Mi smo nevladina i neprofitabilna organizacija osnovana radi istraživanja i dokumentovanja važnih događaja u historiji grada Mostara i Hercegovine, u periodu od 1990 do 2004 godine. Centar posjeduje dokumentarnu građu koja se sastoji od više hiljada originalnih fotografija i filmova , autentičnih dokumenata i oko 3000 sati video materijala, koji svjedoči o događajima u Mostaru i Hercegovini u proteklom periodu.
                 </p>
-                <p className="text-stone-600 leading-relaxed font-['Baskervville']">
+                <p className="text-stone-600 leading-relaxed">
                 Centar nastoji da kroz naučnoistraživački rad prikupi podatke o mnogim događajima u Mostaru i Hercegovini, s namjerom da se ti događaji istraže i učine dostupnim javnosti, putem publikacija, knjiga i dokumentarnih filmova.
                 </p>
               </div>
@@ -100,7 +103,7 @@ export default function ONamaPage() {
               <h2 className="text-3xl font-bold text-stone-800 mb-4 font-heading">
                 Naši programi
               </h2>
-              <p className="text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed font-['Baskervville']">
+              <p className="text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed">
                 Kroz različite programe i inicijative, radimo na izgradnji mira i razumijevanja
               </p>
             </div>
@@ -116,7 +119,7 @@ export default function ONamaPage() {
                       Međunarodna saradnja
                     </h3>
                   </div>
-                  <p className="text-stone-600 leading-relaxed font-['Baskervville']">
+                  <p className="text-stone-600 leading-relaxed">
                     Razvijamo partnerstva sa organizacijama iz cijelog svijeta, dijelimo iskustva i 
                     implementiramo inovativne pristupe mirovnoj izgradnji.
                   </p>
@@ -133,7 +136,7 @@ export default function ONamaPage() {
                       Edukacija mladih
                     </h3>
                   </div>
-                  <p className="text-stone-600 leading-relaxed font-['Baskervville']">
+                  <p className="text-stone-600 leading-relaxed">
                     Organizujemo edukativne programe za mlade koji promovišu toleranciju, 
                     razumijevanje i aktivno građanstvo.
                   </p>
@@ -150,7 +153,7 @@ export default function ONamaPage() {
                       Kulturni događaji
                     </h3>
                   </div>
-                  <p className="text-stone-600 leading-relaxed font-['Baskervville']">
+                  <p className="text-stone-600 leading-relaxed">
                     Organizujemo kulturno-umjetničke manifestacije koje promovišu različitost 
                     i bogatstvo našeg kulturnog naslijeđa.
                   </p>
@@ -167,7 +170,7 @@ export default function ONamaPage() {
                       Psihosocijalna podrška
                     </h3>
                   </div>
-                  <p className="text-stone-600 leading-relaxed font-['Baskervville']">
+                  <p className="text-stone-600 leading-relaxed">
                     Pružamo psihosocijalnu podršku žrtvama rata i njihovim porodicama, 
                     pomažući u procesu oporavka i pomirenja.
                   </p>
@@ -177,13 +180,13 @@ export default function ONamaPage() {
           </div>
 
           {/* Contact Section */}
-          <Card className="border-0 shadow-2xl bg-gradient-to-br from-amber-50 to-stone-50 overflow-hidden rounded-xl">
+          <Card className="border-0 shadow-2xl bg-black overflow-hidden rounded-xl">
             <CardContent className="p-8">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-amber-800 mb-4 font-heading">
+                <h2 className="text-3xl font-bold text-white mb-4 font-heading">
                   Kontaktirajte nas
                 </h2>
-                <p className="text-amber-600 leading-relaxed font-['Baskervville']">
+                <p className="text-stone-300 leading-relaxed">
                   Slobodno nas kontaktirajte za više informacija o našim programima i aktivnostima
                 </p>
               </div>
@@ -191,36 +194,36 @@ export default function ONamaPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">
                   <div className="flex justify-center mb-3">
-                    <div className="p-3 bg-amber-100 rounded-full">
-                      <MapPin className="h-6 w-6 text-amber-700" />
+                    <div className="p-3 bg-white/10 rounded-full">
+                      <MapPin className="h-6 w-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="font-semibold text-amber-800 mb-2">Adresa</h3>
-                  <p className="text-amber-600 text-sm">
+                  <h3 className="font-semibold text-white mb-2">Adresa</h3>
+                  <p className="text-stone-300 text-sm">
                   Mala Tepa 16, 88000 Mostar, BiH
                   </p>
                 </div>
 
                 <div className="text-center">
                   <div className="flex justify-center mb-3">
-                    <div className="p-3 bg-amber-100 rounded-full">
-                      <Phone className="h-6 w-6 text-amber-700" />
+                    <div className="p-3 bg-white/10 rounded-full">
+                      <Phone className="h-6 w-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="font-semibold text-amber-800 mb-2">Telefon</h3>
-                  <p className="text-amber-600 text-sm">
+                  <h3 className="font-semibold text-white mb-2">Telefon</h3>
+                  <p className="text-stone-300 text-sm">
                   +387 36 506 999
                   </p>
                 </div>
 
                 <div className="text-center">
                   <div className="flex justify-center mb-3">
-                    <div className="p-3 bg-amber-100 rounded-full">
-                      <Mail className="h-6 w-6 text-amber-700" />
+                    <div className="p-3 bg-white/10 rounded-full">
+                      <Mail className="h-6 w-6 text-white" />
                     </div>
                   </div>
-                  <h3 className="font-semibold text-amber-800 mb-2">Email</h3>
-                  <p className="text-amber-600 text-sm">
+                  <h3 className="font-semibold text-white mb-2">Email</h3>
+                  <p className="text-stone-300 text-sm">
                   info@centarzamir.org.ba
                   </p>
                 </div>
@@ -230,5 +233,6 @@ export default function ONamaPage() {
         </div>
       </div>
     </main>
+    </div>
   );
 }

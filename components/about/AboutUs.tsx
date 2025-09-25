@@ -36,7 +36,7 @@ export default function AboutUs() {
                   className="inline-flex items-center px-8 py-4 text-lg font-semibold 
                              bg-[#5B2323] text-white rounded-xl shadow-lg hover:bg-[#4a1e1e] 
                              hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200
-                             focus:outline-none focus:ring-4 focus:ring-[#5B2323]/30 font-['Poppins']"
+                             focus:outline-none focus:ring-4 focus:ring-[#5B2323]/30"
                 >
                   Naša vizija
                 </Link>

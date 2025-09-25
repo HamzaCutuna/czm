@@ -5,54 +5,65 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Calendar, Clock, Target, Gem } from "lucide-react";
-import { getLeaderboard } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 interface LeaderboardEntry {
   rank: number;
   user_id: string;
-  display_name: string;
-  accuracy: number;
-  time_spent: number;
-  num_questions: number;
-  diamonds_earned: number;
+  full_name: string;
+  score_percent: number;
+  correct_count: number;
+  total_count: number;
+  duration_ms: number;
   created_at: string;
 }
 
-interface LeaderboardData {
-  success: boolean;
-  scope: string;
-  page: number;
-  page_size: number;
-  total_count: number;
-  data: LeaderboardEntry[];
-}
-
-const SCOPE_LABELS = {
-  daily: 'Dnevni',
-  weekly: 'Sedmični',
-  monthly: 'Mjesečni',
-  all: 'Sveukupno'
-};
 
 export function Leaderboard() {
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardData | null>(null);
-  const [currentScope, setCurrentScope] = useState<'daily' | 'weekly' | 'monthly' | 'all'>('daily');
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchLeaderboard = async (scope: string) => {
+  const fetchLeaderboard = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const { data, error } = await getLeaderboard(scope, 1, 20);
+      // Fetch top 10 quiz results with user profiles
+      const { data, error } = await supabase
+        .from('quiz_results')
+        .select(`
+          id,
+          user_id,
+          score_percent,
+          correct_count,
+          total_count,
+          duration_ms,
+          created_at,
+          profiles!inner(full_name)
+        `)
+        .order('score_percent', { ascending: false })
+        .order('duration_ms', { ascending: true })
+        .limit(10);
       
       if (error) {
         setError(error.message || 'Greška pri učitavanju rang liste');
         return;
       }
       
-      setLeaderboardData(data);
+              // Transform data to include rank and flatten profile data
+              const transformedData = data?.map((entry, index) => ({
+                rank: index + 1,
+                user_id: entry.user_id,
+                full_name: (entry.profiles as any)?.full_name || 'Korisnik',
+                score_percent: entry.score_percent,
+                correct_count: entry.correct_count,
+                total_count: entry.total_count,
+                duration_ms: entry.duration_ms,
+                created_at: entry.created_at
+              })) || [];
+      
+      setLeaderboardData(transformedData);
     } catch (err: any) {
       setError(err.message || 'Greška pri učitavanju rang liste');
     } finally {
@@ -61,8 +72,8 @@ export function Leaderboard() {
   };
 
   useEffect(() => {
-    fetchLeaderboard(currentScope);
-  }, [currentScope]);
+    fetchLeaderboard();
+  }, []);
 
   const formatTime = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
@@ -90,27 +101,8 @@ export function Leaderboard() {
       <CardHeader>
         <CardTitle className="text-xl font-semibold text-amber-800 flex items-center gap-2">
           <Trophy className="h-5 w-5" />
-          Najbolji rezultati
+          Top 10 igrača
         </CardTitle>
-        
-        {/* Scope Tabs */}
-        <div className="flex gap-2 mt-4">
-          {Object.entries(SCOPE_LABELS).map(([scope, label]) => (
-            <Button
-              key={scope}
-              onClick={() => setCurrentScope(scope as any)}
-              variant={currentScope === scope ? "default" : "outline"}
-              size="sm"
-              className={
-                currentScope === scope
-                  ? "bg-amber-600 text-white hover:bg-amber-700"
-                  : "border-amber-300 text-amber-700 hover:bg-amber-100"
-              }
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
       </CardHeader>
       
       <CardContent>
@@ -119,13 +111,13 @@ export function Leaderboard() {
             <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
             <p className="text-amber-600">Učitavanje...</p>
           </div>
-        )}
+            )}
         
         {error && (
           <div className="text-center py-8">
             <p className="text-red-600">{error}</p>
             <Button
-              onClick={() => fetchLeaderboard(currentScope)}
+              onClick={() => fetchLeaderboard()}
               variant="outline"
               size="sm"
               className="mt-2"
@@ -135,69 +127,54 @@ export function Leaderboard() {
           </div>
         )}
         
-        {leaderboardData && !loading && !error && (
+        {leaderboardData.length > 0 && !loading && !error && (
           <div className="space-y-3">
-            {leaderboardData.data.length === 0 ? (
-              <div className="text-center py-8 text-amber-600">
-                <Trophy className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>Nema rezultata za {SCOPE_LABELS[currentScope].toLowerCase()} rang listu</p>
-              </div>
-            ) : (
-              leaderboardData.data.map((entry) => (
-                <div key={entry.user_id} className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getRankColor(entry.rank)}`}>
-                      {getRankIcon(entry.rank)}
-                    </div>
-                    <div>
-                      <div className="font-medium text-stone-700">{entry.display_name}</div>
-                      <div className="text-xs text-stone-500">
-                        {new Date(entry.created_at).toLocaleDateString('bs-BA')}
-                      </div>
-                    </div>
+            {leaderboardData.map((entry) => (
+              <div key={entry.user_id} className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getRankColor(entry.rank)}`}>
+                    {getRankIcon(entry.rank)}
                   </div>
-                  
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="text-center">
-                      <div className="flex items-center gap-1 text-amber-700 font-bold">
-                        <Target className="h-4 w-4" />
-                        {entry.accuracy.toFixed(1)}%
-                      </div>
-                    </div>
-                    
-                    <div className="text-center">
-                      <div className="flex items-center gap-1 text-stone-600">
-                        <Clock className="h-4 w-4" />
-                        {formatTime(entry.time_spent)}
-                      </div>
-                    </div>
-                    
-                    <div className="text-center">
-                      <div className="text-stone-600">
-                        {entry.num_questions} pitanja
-                      </div>
-                    </div>
-                    
-                    <div className="text-center">
-                      <div className="flex items-center gap-1 text-green-600 font-bold">
-                        <Gem className="h-4 w-4" />
-                        {entry.diamonds_earned}
-                      </div>
+                  <div>
+                    <div className="font-medium text-stone-700">{entry.full_name}</div>
+                    <div className="text-xs text-stone-500">
+                      {new Date(entry.created_at).toLocaleDateString('bs-BA')}
                     </div>
                   </div>
                 </div>
-              ))
-            )}
-            
-            {leaderboardData.total_count > leaderboardData.data.length && (
-              <div className="text-center pt-4">
-                <p className="text-sm text-amber-600">
-                  Prikazano {leaderboardData.data.length} od {leaderboardData.total_count} rezultata
-                </p>
+                
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="text-center">
+                    <div className="flex items-center gap-1 text-amber-700 font-bold">
+                      <Target className="h-4 w-4" />
+                      {entry.score_percent.toFixed(1)}%
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="flex items-center gap-1 text-stone-600">
+                      <Clock className="h-4 w-4" />
+                      {formatTime(entry.duration_ms)}
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-stone-600">
+                      {entry.correct_count}/{entry.total_count}
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
+            ))}
           </div>
         )}
+        
+        {leaderboardData.length === 0 && !loading && !error && (
+          <div className="text-center py-8 text-amber-600">
+            <Trophy className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <p>Nema rezultata kvizova</p>
+          </div>
+            )}
       </CardContent>
     </Card>
   );

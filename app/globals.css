@@ -1,3 +1,6 @@
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 /* Leaflet CSS */
 @import 'leaflet/dist/leaflet.css';
 
@@ -165,94 +168,14 @@ body {
   }
 }
 
-@font-face {
-  font-family: 'Baskervville';
-  src: url('/fonts/Baskervville-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Baskervville';
-  src: url('/fonts/Baskervville-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Baskervville';
-  src: url('/fonts/Baskervville-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Baskervville';
-  src: url('/fonts/Baskervville-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'MarcellusSC';
-  src: url('/fonts/MarcellusSC-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Forum';
-  src: url('/fonts/Forum-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Poppins';
-  src: url('/fonts/Poppins-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 @layer base {
   :root {
     --color-bg: #F6F1E7;
     --color-primary: #4F8A5B;
     --color-secondary: #C4A484;
-    --font-heading: 'MarcellusSC', serif;
-    --font-body: 'Baskervville', serif;
-    --font-numbers: 'Forum', serif;
+    --font-heading: 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-numbers: 'Inter', sans-serif;
     
     /* Safe area insets for mobile devices */
     --safe-area-inset-top: env(safe-area-inset-top, 0px);

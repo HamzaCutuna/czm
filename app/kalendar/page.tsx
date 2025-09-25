@@ -8,6 +8,7 @@ import EventCard from "@/components/calendar/EventCard";
 import CustomDatePicker from "@/components/calendar/CustomDatePicker";
 import { CalendarEvent, CalendarCategory, fetchEventsByDate } from "@/lib/calendar";
 import { useRouter, useSearchParams } from "next/navigation";
+import { SolidNavbar } from "@/components/navbar/SolidNavbar";
 
 type CategoryOrAll = CalendarCategory | 'Sve';
 
@@ -96,7 +97,9 @@ function KalendarPageContent() {
   };
 
   return (
-    <main className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
+    <div className="min-h-screen flex flex-col">
+      <SolidNavbar />
+      <main className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-12 md:py-12 flex-1">
       <CalendarHeader date={selectedDate} onPrev={onPrev} onNext={onNext} onOpenPicker={() => setPickerOpen(true)} />
 
       <div className="mt-6 grid grid-cols-1 md:grid-cols-[16rem,1fr] gap-6 md:gap-8 items-start">
@@ -139,11 +142,12 @@ function KalendarPageContent() {
         </section>
       </div>
 
-      <EventModal open={modalOpen} event={modalEvent} onOpenChange={setModalOpen} />
+      <EventModal open={modalOpen} event={modalEvent} onOpenChange={setModalOpen} selectedDate={selectedDate} />
               <CustomDatePicker open={pickerOpen} date={selectedDate} onOpenChange={setPickerOpen} onConfirm={(d) => setSelectedDate(d)} />
-          </main>
-    );
-  }
+      </main>
+    </div>
+  );
+}
 
 export default function KalendarPage() {
   return (

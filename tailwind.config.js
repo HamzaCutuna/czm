@@ -16,8 +16,8 @@ module.exports = {
         'color-secondary': '#C4A484',
       },
       fontFamily: {
-        heading: ['var(--font-heading)', 'serif'],
-        body: ['var(--font-body)', 'serif'],
+        heading: ['var(--font-heading)', 'sans-serif'],
+        body: ['var(--font-body)', 'sans-serif'],
       },
     },
   },

@@ -119,12 +119,85 @@ export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
           </p>
         </motion.div>
 
+        {/* Mobile Layout: Prevuci chip -> Date switch -> Events */}
+        <div className="lg:hidden">
+          {/* Mobile Scroll Indicator */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-center mb-6"
+          >
+            <div className="inline-flex items-center gap-2 text-white/80 text-sm bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
+              <div className="flex items-center gap-1">
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse"></div>
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+              <span>Prevuci za više događaja</span>
+              <div className="flex items-center gap-1">
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Date chip with navigation - Mobile: below Prevuci chip */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mb-6 xs:mb-8"
+          >
+            <div className="inline-flex items-center text-xs sm:text-sm text-white/90 bg-white/10 backdrop-blur-sm rounded-full px-2 xs:px-3 sm:px-4 py-1 xs:py-2 sm:py-3 border border-white/20 mx-1 xs:mx-2 sm:mx-0">
+              {/* Previous button */}
+              <button
+                onClick={handlePreviousDay}
+                className="h-6 w-6 xs:h-7 xs:w-7 sm:h-8 sm:w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors mr-1 sm:mr-2"
+                title="Prethodni dan"
+              >
+                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+              </button>
+
+              {/* Date display */}
+              <div
+                className="flex items-center cursor-pointer hover:bg-white/10 rounded-full px-1 xs:px-2 sm:px-3 py-1 transition-colors"
+                onClick={() => setIsDatePickerOpen(true)}
+              >
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="text-xs sm:text-sm">
+                  <strong>Datum:</strong> {formatBsDate(selectedDate.getDate(), selectedDate.getMonth() + 1)}
+                </span>
+              </div>
+
+              {/* Next button */}
+              <button
+                onClick={handleNextDay}
+                className="h-6 w-6 xs:h-7 xs:w-7 sm:h-8 sm:w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors ml-1 sm:ml-2"
+                title="Sledeći dan"
+              >
+                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+              </button>
+
+              {/* Today button */}
+              <button
+                onClick={handleToday}
+                className="ml-1 xs:ml-2 sm:ml-3 px-1 xs:px-2 sm:px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-xs font-medium"
+                title="Danas"
+              >
+                Danas
+              </button>
+            </div>
+          </motion.div>
+        </div>
+
         {/* Events Carousel */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-6 xs:mb-12"
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="mb-6 xs:mb-8"
         >
           {error ? (
             <div className="text-center py-12">
@@ -141,55 +214,61 @@ export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
             <TodaySwiper
               events={data?.danasIstaknuto || []}
               isLoading={isLoading}
+              selectedDate={selectedDate}
             />
           )}
         </motion.div>
 
-        {/* Date chip with navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="inline-flex items-center text-xs sm:text-sm text-white/90 bg-white/10 backdrop-blur-sm rounded-full px-2 xs:px-3 sm:px-4 py-1 xs:py-2 sm:py-3 border border-white/20 mx-1 xs:mx-2 sm:mx-0"
-        >
-          {/* Previous button */}
-          <button
-            onClick={handlePreviousDay}
-            className="h-6 w-6 xs:h-7 xs:w-7 sm:h-8 sm:w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors mr-1 sm:mr-2"
-            title="Prethodni dan"
+        {/* Desktop Layout: Events -> Date switch */}
+        <div className="hidden lg:block">
+          {/* Date chip with navigation - Desktop: below events */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="mb-6 xs:mb-12"
           >
-            <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-          </button>
+            <div className="inline-flex items-center text-xs sm:text-sm text-white/90 bg-white/10 backdrop-blur-sm rounded-full px-2 xs:px-3 sm:px-4 py-1 xs:py-2 sm:py-3 border border-white/20 mx-1 xs:mx-2 sm:mx-0">
+              {/* Previous button */}
+              <button
+                onClick={handlePreviousDay}
+                className="h-6 w-6 xs:h-7 xs:w-7 sm:h-8 sm:w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors mr-1 sm:mr-2"
+                title="Prethodni dan"
+              >
+                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+              </button>
 
-          {/* Date display */}
-          <div
-            className="flex items-center cursor-pointer hover:bg-white/10 rounded-full px-1 xs:px-2 sm:px-3 py-1 transition-colors"
-            onClick={() => setIsDatePickerOpen(true)}
-          >
-            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="text-xs sm:text-sm">
-              <strong>Datum:</strong> {formatBsDate(displayDate.dan, displayDate.mjesec)}
-            </span>
-          </div>
+              {/* Date display */}
+              <div
+                className="flex items-center cursor-pointer hover:bg-white/10 rounded-full px-1 xs:px-2 sm:px-3 py-1 transition-colors"
+                onClick={() => setIsDatePickerOpen(true)}
+              >
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="text-xs sm:text-sm">
+                  <strong>Datum:</strong> {formatBsDate(selectedDate.getDate(), selectedDate.getMonth() + 1)}
+                </span>
+              </div>
 
-          {/* Next button */}
-          <button
-            onClick={handleNextDay}
-            className="h-6 w-6 xs:h-7 xs:w-7 sm:h-8 sm:w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors ml-1 sm:ml-2"
-            title="Sledeći dan"
-          >
-            <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
-          </button>
+              {/* Next button */}
+              <button
+                onClick={handleNextDay}
+                className="h-6 w-6 xs:h-7 xs:w-7 sm:h-8 sm:w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors ml-1 sm:ml-2"
+                title="Sledeći dan"
+              >
+                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+              </button>
 
-          {/* Today button */}
-          <button
-            onClick={handleToday}
-            className="ml-1 xs:ml-2 sm:ml-3 px-1 xs:px-2 sm:px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-xs font-medium"
-            title="Danas"
-          >
-            Danas
-          </button>
-        </motion.div>
+              {/* Today button */}
+              <button
+                onClick={handleToday}
+                className="ml-1 xs:ml-2 sm:ml-3 px-1 xs:px-2 sm:px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-xs font-medium"
+                title="Danas"
+              >
+                Danas
+              </button>
+            </div>
+          </motion.div>
+        </div>
       </div>
 
       {/* Date Picker Modal */}

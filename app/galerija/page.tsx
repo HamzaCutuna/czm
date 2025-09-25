@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getAllGalleryCategories } from "@/lib/galleryData";
 import { Folder } from "lucide-react";
+import { SolidNavbar } from "@/components/navbar/SolidNavbar";
 
 export const metadata = {
   title: "Galerija | TV Kalendar",
@@ -11,7 +12,9 @@ export default function GalleryPage() {
   const categories = getAllGalleryCategories();
 
   return (
-    <main className="min-h-dvh bg-[--color-bg] text-stone-800">
+    <div className="min-h-screen flex flex-col">
+      <SolidNavbar />
+      <main className="min-h-dvh bg-[--color-bg] text-stone-800 flex-1">
       {/* Hero Section */}
       <div className="container mx-auto px-4 pt-20 pb-8">
         <div className="text-center mb-12">
@@ -95,6 +98,7 @@ export default function GalleryPage() {
         </div>
       </div>
     </main>
+    </div>
   );
 }
 

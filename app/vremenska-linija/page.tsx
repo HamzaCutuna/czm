@@ -7,6 +7,7 @@ import { Clock } from "lucide-react";
 import { fetchEventsByDate } from "@/lib/calendar";
 import { CalendarEvent, CalendarCategory } from "@/lib/calendar";
 import EventModal from "@/components/calendar/EventModal";
+import { SolidNavbar } from "@/components/navbar/SolidNavbar";
 
 function VremenskaLinijaPageContent() {
   const router = useRouter();
@@ -129,7 +130,9 @@ function VremenskaLinijaPageContent() {
   }));
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen flex flex-col">
+      <SolidNavbar />
+      <main className="min-h-dvh bg-stone-50 flex-1">
       {/* Hero Section */}
       <div className="container mx-auto px-4 pt-20 pb-8">
         <div className="text-center mb-12">
@@ -254,6 +257,7 @@ function VremenskaLinijaPageContent() {
           onOpenChange={setModalOpen}
         />
       )}
+      </main>
     </div>
   );
 }

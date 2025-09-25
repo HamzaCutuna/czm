@@ -50,8 +50,7 @@ export default function EventCard({ event, onReadMore }: EventCardProps) {
         </div>
       </div>
       <div className="mt-3 flex-1 flex flex-col">
-        <h3 className="text-base font-semibold text-stone-900 line-clamp-2">{event.title}</h3>
-        <p className="mt-2 text-sm text-stone-700 line-clamp-3 flex-1">{event.shortText}</p>
+        <p className="text-sm text-stone-700 line-clamp-4 flex-1">{event.shortText}</p>
         <div className="mt-3 flex justify-center">
           <button
             onClick={() => onReadMore(event)}

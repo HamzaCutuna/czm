@@ -20,12 +20,27 @@ import "swiper/css/navigation";
 interface TodaySwiperProps {
   events: NaDanasnjiDanResponseDogadaj[];
   isLoading?: boolean;
+  selectedDate?: Date;
 }
 
 // Helper function to extract short title from opis
 function shortTitle(opis: string, n = 110): string {
-  const s = opis.split(/[.!?]/)[0] || opis;
-  return (s.length > n ? s.slice(0, n).trimEnd() + "…" : s).replace(/\s+,/g, ",");
+  // Remove leading dots, spaces, and other punctuation
+  let cleaned = opis.replace(/^[.\s,;:!?]+/, '').trim();
+  
+  // If the cleaned text is too short, try to get more content
+  if (cleaned.length < 20) {
+    // Take first sentence or first part up to n characters
+    const firstSentence = opis.split(/[.!?]/)[0] || opis;
+    cleaned = firstSentence.replace(/^[.\s,;:!?]+/, '').trim();
+  }
+  
+  // If still too short, take more characters from the original
+  if (cleaned.length < 20) {
+    cleaned = opis.slice(0, n).replace(/^[.\s,;:!?]+/, '').trim();
+  }
+  
+  return cleaned.length > n ? cleaned.slice(0, n).trimEnd() + "…" : cleaned;
 }
 
 // Helper function to get region color
@@ -39,7 +54,7 @@ function getRegionColor(regija: string): string {
   return colors[regija as keyof typeof colors] || colors.default;
 }
 
-export function TodaySwiper({ events, isLoading }: TodaySwiperProps) {
+export function TodaySwiper({ events, isLoading, selectedDate = new Date() }: TodaySwiperProps) {
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<NaDanasnjiDanResponseDogadaj | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -94,7 +109,7 @@ export function TodaySwiper({ events, isLoading }: TodaySwiperProps) {
     };
 
     return (
-      <div className="group relative w-72 h-96 rounded-3xl border border-stone-200/50 bg-white/90 shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:border-stone-300">
+      <div className="group relative w-72 h-[28rem] rounded-3xl border border-stone-200/50 bg-white/90 shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:border-stone-300">
         {/* Image Container */}
         <div className="h-56 bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden relative">
           {imageUrl ? (
@@ -136,9 +151,9 @@ export function TodaySwiper({ events, isLoading }: TodaySwiperProps) {
         </div>
 
         {/* Content */}
-        <div className="p-6 flex flex-col h-40">
+        <div className="p-6 flex flex-col h-48">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-stone-800 leading-tight font-body line-clamp-3">
+            <h3 className="text-lg font-semibold text-stone-800 leading-tight font-body line-clamp-4">
               {shortTitle(event.opis, 120)}
             </h3>
           </div>
@@ -178,22 +193,6 @@ export function TodaySwiper({ events, isLoading }: TodaySwiperProps) {
         <ChevronRight className="h-6 w-6 text-stone-700" />
       </button>
 
-      {/* Mobile Scroll Indicator */}
-      <div className="lg:hidden text-center mb-6">
-        <div className="inline-flex items-center gap-2 text-white/80 text-sm bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
-          <div className="flex items-center gap-1">
-            <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse"></div>
-            <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-          </div>
-          <span>Prevuci za više događaja</span>
-          <div className="flex items-center gap-1">
-            <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-            <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse"></div>
-          </div>
-        </div>
-      </div>
 
       {/* Swiper Container */}
       <Swiper
@@ -257,6 +256,7 @@ export function TodaySwiper({ events, isLoading }: TodaySwiperProps) {
           setIsModalOpen(false);
           setSelectedEvent(null);
         }}
+        selectedDate={selectedDate}
       />
     </div>
   );

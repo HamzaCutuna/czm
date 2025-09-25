@@ -239,7 +239,7 @@ function SafeLayers({ pins }: { pins: GroupedPin[] }) {
         font-weight: bold;
         font-size: 10px;
         text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
         box-shadow: 0 1px 3px rgba(0,0,0,0.3);
       }
       
@@ -270,7 +270,7 @@ function SafeLayers({ pins }: { pins: GroupedPin[] }) {
         font-weight: bold;
         font-size: 14px;
         text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
       }
       
       /* Mobile responsiveness */
@@ -448,7 +448,7 @@ function SafeLayers({ pins }: { pins: GroupedPin[] }) {
         html: `
           <div class="grouped-marker">
             <div class="grouped-marker-bg">
-              <span class="grouped-marker-count" style="font-family: 'Poppins', sans-serif;">${count}</span>
+              <span class="grouped-marker-count" style="font-family: 'Inter', sans-serif;">${count}</span>
             </div>
           </div>
         `,
@@ -555,7 +555,7 @@ function SafeLayers({ pins }: { pins: GroupedPin[] }) {
                             className="inline-flex items-center rounded-md px-4 py-2 text-sm font-medium
                                        bg-white text-[#5B2323] border-2 border-[#5B2323] hover:bg-[#5B2323] hover:text-white 
                                        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#5B2323] transition-all duration-200
-                                       font-['Poppins'] font-semibold"
+                                       font-semibold"
                           >
                             Detalji
                           </button>
