@@ -2,12 +2,12 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Chrono } from "react-chrono";
 import { Clock } from "lucide-react";
 import { fetchEventsByDate } from "@/lib/calendar";
 import { CalendarEvent, CalendarCategory } from "@/lib/calendar";
 import EventModal from "@/components/calendar/EventModal";
 import { SolidNavbar } from "@/components/navbar/SolidNavbar";
+import { TimelineJSComponent } from "@/components/timeline/TimelineJSComponent";
 
 function VremenskaLinijaPageContent() {
   const router = useRouter();
@@ -112,22 +112,10 @@ function VremenskaLinijaPageContent() {
     setModalOpen(true);
   };
 
-  const formatBosnianDate = (date: Date) => {
-    const months = ['januar','februar','mart','april','maj','juni','juli','august','septembar','oktobar','novembar','decembar'];
-    return `${date.getDate()}. ${months[date.getMonth()]} ${date.getFullYear()}`;
+  const handleEventSelect = (event: CalendarEvent) => {
+    setModalEvent(event);
+    setModalOpen(true);
   };
-
-  // Convert events to Chrono items
-  const chronoItems = filteredEvents.map(event => ({
-    title: event.year.toString(),
-    cardTitle: event.title || event.shortText.substring(0, 50) + '...',
-    cardDetailedText: event.shortText,
-    media: event.imageUrl ? {
-      type: "IMAGE" as const,
-      source: { url: event.imageUrl }
-    } : undefined,
-    cardSubtitle: event.category,
-  }));
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -193,6 +181,45 @@ function VremenskaLinijaPageContent() {
 
       {/* Timeline */}
       <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-8">
+        <style jsx global>{`
+          .timeline-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          }
+          
+          .tl-timeline {
+            font-family: 'PT Sans', sans-serif;
+          }
+          
+          .tl-timeline h1, .tl-timeline h2, .tl-timeline h3 {
+            font-family: 'PT Sans', sans-serif;
+          }
+          
+          .tl-slide {
+            border-radius: 8px;
+          }
+          
+          .tl-slide-content {
+            border-radius: 8px;
+          }
+          
+          .tl-timenav {
+            background: linear-gradient(to right, #f5f5f4, #e7e5e4);
+          }
+          
+          .tl-timenav-slider {
+            background: #78716c;
+          }
+          
+          .tl-timenav-slider-button {
+            background: #d97706;
+          }
+          
+          .tl-timenav-slider-button:hover {
+            background: #b45309;
+          }
+        `}</style>
         {loading && (
           <div className="h-96 flex items-center justify-center">
             <div className="text-stone-500">Učitavanje...</div>
@@ -218,32 +245,10 @@ function VremenskaLinijaPageContent() {
         )}
 
         {!loading && !error && filteredEvents.length > 0 && (
-          <div className="h-[600px]">
-            <Chrono
-              items={chronoItems}
-              mode="HORIZONTAL"
-              theme={{
-                primary: '#78716c',
-                secondary: '#f5f5f4',
-                cardBgColor: '#ffffff',
-                cardForeColor: '#1c1917',
-                titleColor: '#1c1917',
-                titleColorActive: '#1c1917',
-              }}
-              fontSizes={{
-                cardSubtitle: '0.85rem',
-                cardText: '0.9rem',
-                cardTitle: '1rem',
-                title: '1.1rem',
-              }}
-              onItemSelect={(item) => {
-                if (typeof item === 'object' && item.title) {
-                  const event = filteredEvents.find(e => e.year.toString() === item.title);
-                  if (event) {
-                    handleReadMore(event);
-                  }
-                }
-              }}
+          <div className="w-full">
+            <TimelineJSComponent 
+              events={filteredEvents}
+              onEventSelect={handleEventSelect}
             />
           </div>
         )}

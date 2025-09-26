@@ -9,7 +9,7 @@ import {
 import { VerticalTimelineComponent } from "@/components/timeline/VerticalTimeline";
 import { SolidNavbar } from "@/components/navbar/SolidNavbar";
 
-export default function ProjektiPage() {
+export default function OProjektuPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <SolidNavbar />
@@ -23,7 +23,7 @@ export default function ProjektiPage() {
             </div>
           </div>
           <h1 className="text-6xl font-bold text-stone-800 mb-4 font-heading tracking-wide">
-            Projekti
+            O projektu
           </h1>
           <p className="text-xl text-stone-600 max-w-2xl mx-auto leading-relaxed">
             Upoznajte naš tim i pratite razvoj Historija TV platforme

@@ -10,8 +10,9 @@ const links = [
   { href: "/", label: "Početna" },
   { href: "/kalendar", label: "Kalendar" },
   { href: "/vremenska-linija", label: "Vremenska linija" },
-  { href: "/projekti", label: "Projekti" },
-  { href: "/o-nama", label: "O nama" },
+  { href: "/galerija", label: "Galerija" },
+  { href: "/igre", label: "Kvizovi" },
+  { href: "/o-projektu", label: "O projektu" },
 ];
 
 export function SiteFooter() {

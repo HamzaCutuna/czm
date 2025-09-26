@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/o-nama", label: "O NAMA" },
+  { href: "/", label: "POČETNA" },
   { href: "/kalendar", label: "KALENDAR" },
   { href: "/vremenska-linija", label: "VREMENSKA LINIJA" },
   { href: "/galerija", label: "GALERIJA" },
   { href: "/igre", label: "KVIZOVI" },
-  { href: "/projekti", label: "PROJEKTI" },
+  { href: "/o-projektu", label: "O PROJEKTU" },
 ];
 
 interface MainNavProps {
