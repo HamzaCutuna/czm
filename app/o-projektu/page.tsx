@@ -73,7 +73,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;Vodim tim koji radi na digitalizaciji kulturno-historijskog naslijeđa kroz inovativne tehnološke rješenja.&rdquo;
+                    &ldquo;[placeholder]&rdquo;
                   </p>
                 </CardContent>
               </Card>
@@ -92,7 +92,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;Fokusiraju se na razvoj korisničkog interfejsa koji čini historiju pristupačnom svim generacijama.&rdquo;
+                    &ldquo;[placeholder]&rdquo;
                   </p>
                 </CardContent>
               </Card>
@@ -111,7 +111,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;Radim na backend sistemu koji omogućava sigurno čuvanje i pristup historijskim podacima.&rdquo;
+                    &ldquo;[placeholder]&rdquo;
                   </p>
                 </CardContent>
               </Card>
@@ -130,7 +130,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;Specijalizovana za dizajn interaktivnih elemenata koji čine učenje historije zanimljivijim.&rdquo;
+                    &ldquo;[placeholder]&rdquo;
                   </p>
                 </CardContent>
               </Card>
@@ -149,7 +149,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;Razvijam algoritme za personalizovano preporučivanje historijskog sadržaja korisnicima.&rdquo;
+                    &ldquo;[placeholder]&rdquo;
                   </p>
                 </CardContent>
               </Card>
@@ -168,7 +168,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;Radim na optimizaciji performansi i poboljšanju korisničkog iskustva platforme.&rdquo;
+                    &ldquo;[placeholder]&rdquo;
                   </p>
                 </CardContent>
               </Card>
@@ -243,7 +243,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;Radim na dizajnu vizuelnih elemenata koji čine historijske događaje živim i upečatljivim.&rdquo;
+                    &ldquo;[placeholder]&rdquo;
                   </p>
                 </CardContent>
               </Card>
@@ -262,7 +262,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;Fokusiraju se na razvoj sigurnosnih protokola za zaštitu historijskih podataka.&rdquo;
+                    &ldquo;Moja motivacija za rad na projektu proističe iz želje da se historija ne zaboravi, već da se prenese i prezentuje na savremen, interaktivan način. Smatram da projekat ima ogromnu društvenu vrijednost jer omogućava mladima, ali i široj javnosti, da na jednostavan način uče i istražuju prošlost kroz moderne tehnologije.&rdquo;
                   </p>
                 </CardContent>
               </Card>
@@ -281,7 +281,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;Radim na razvoju sistema za upravljanje sadržajem koji omogućava lakše ažuriranje platforme.&rdquo;
+                    &ldquo;[placeholder]&rdquo;
                   </p>
                 </CardContent>
               </Card>
@@ -319,7 +319,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;Radim na sadržaju koji ističe činjenice i povezuje događaje kroz vrijeme.&rdquo;
+                    &ldquo;[placeholder]&rdquo;
                   </p>
                 </CardContent>
               </Card>
@@ -338,7 +338,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;Motiviše me ideja da se sjećanje očuva digitalno i da mladi lakše uče.&rdquo;
+                    &ldquo;[placeholder]&rdquo;
                   </p>
                 </CardContent>
               </Card>

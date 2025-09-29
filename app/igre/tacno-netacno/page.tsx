@@ -172,7 +172,7 @@ function buildStatements(events: FlatEvent[], count = 20): Statement[] {
     const idx = Math.floor(Math.random() * pool.length);
     const ev = pool.splice(idx, 1)[0];
     const trueStatement: Statement = {
-      text: `${ev.Opis.split(/[.!?]/)[0]}.`,
+      text: ev.Opis.length > 120 ? `${ev.Opis.slice(0, 120).trimEnd()}...` : ev.Opis,
       isTrue: true,
       region: ev.Regija || "Općenito",
     };
@@ -181,9 +181,10 @@ function buildStatements(events: FlatEvent[], count = 20): Statement[] {
       const year = Number(m[0]);
       const delta = Math.floor(Math.random() * 3) + 1;
       const wrongYear = Math.random() > 0.5 ? year + delta : year - delta;
-      const falseText = ev.Opis.replace(String(year), String(wrongYear)).split(/[.!?]/)[0] + ".";
-      out.push(trueStatement, { 
-        text: falseText, 
+      const falseText = ev.Opis.replace(String(year), String(wrongYear));
+      const truncatedFalseText = falseText.length > 120 ? `${falseText.slice(0, 120).trimEnd()}...` : falseText;
+      out.push(trueStatement, {
+        text: truncatedFalseText,
         isTrue: false, 
         explanation: `Tačna godina je ${year}.`,
         region: ev.Regija || "Općenito",

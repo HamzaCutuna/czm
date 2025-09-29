@@ -14,8 +14,7 @@ export interface CalendarEvent {
 }
 
 function firstSentence(text: string, max = 160): string {
-  const s = (text || '').split(/[.!?]/)[0] || text || '';
-  const trimmed = s.trim();
+  const trimmed = (text || '').trim();
   return trimmed.length > max ? trimmed.slice(0, max).trimEnd() + '…' : trimmed;
 }
 

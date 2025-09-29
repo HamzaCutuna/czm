@@ -50,32 +50,32 @@ const timelineData: TimelineItem[] = [
   },
   {
     year: "2025",
-    title: "Finalno testiranje i optimizacija",
-    description: "Kompletno testiranje svih funkcionalnosti, optimizacija performansi i priprema za javno lansiranje platforme.",
+    title: "Ubrzo",
+    description: "[placeholder]",
     status: "upcoming"
   },
   {
     year: "2026",
-    title: "Javno lansiranje",
-    description: "Oficijelno lansiranje Historija TV platforme za širu javnost sa svim osnovnim funkcionalnostima.",
+    title: "Ubrzo",
+    description: "[placeholder]",
     status: "upcoming"
   },
   {
     year: "2026",
-    title: "Proširenje sadržaja",
-    description: "Dodavanje novih historijskih tema, interaktivnih sadržaja i integracija sa muzejskim kolekcijama.",
+    title: "Ubrzo",
+    description: "[placeholder]",
     status: "upcoming"
   },
   {
     year: "2026",
-    title: "Mobilna aplikacija",
-    description: "Razvoj native mobilne aplikacije za iOS i Android platforme.",
+    title: "Ubrzo",
+    description: "[placeholder]",
     status: "upcoming"
   },
   {
     year: "2026",
-    title: "AI integracija",
-    description: "Implementacija AI asistenta za personalizovano učenje i preporuke sadržaja.",
+    title: "Ubrzo",
+    description: "[placeholder]",
     status: "upcoming"
   }
 ];

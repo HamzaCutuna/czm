@@ -18,7 +18,7 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event, onReadMore }: EventCardProps) {
-  const alt = event.title || event.shortText.split(/[.!?]/)[0] || "Događaj";
+  const alt = event.title || event.shortText || "Događaj";
 
   return (
     <div className="rounded-2xl border border-stone-200 bg-white p-3 shadow-sm h-full flex flex-col">

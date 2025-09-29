@@ -31,7 +31,7 @@ function shortTitle(opis: string, n = 110): string {
   // If the cleaned text is too short, try to get more content
   if (cleaned.length < 20) {
     // Take first sentence or first part up to n characters
-    const firstSentence = opis.split(/[.!?]/)[0] || opis;
+    const firstSentence = opis.length > 100 ? opis.slice(0, 100).trimEnd() + '…' : opis;
     cleaned = firstSentence.replace(/^[.\s,;:!?]+/, '').trim();
   }
   
