@@ -149,7 +149,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;[placeholder]&rdquo;
+                    &ldquo;Motivisana sam radom na ovom projektu jer vjerujem da kroz zajednički trud možemo doprinijeti očuvanju historije i prenošenju važnih priča budućim generacijama. Ovaj projekat mi pruža priliku da učim, istražujem i aktivno doprinesem nečemu što ima dugoročnu vrijednost za našu zajednicu.&rdquo;
                   </p>
                 </CardContent>
               </Card>
