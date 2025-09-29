@@ -108,7 +108,7 @@ export function EventModal({ event, isOpen, onClose, selectedDate = new Date() }
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="h-5 w-5 text-stone-600" />
                       <span className="text-lg font-semibold text-stone-800">
-                        {event.godina} {String(selectedDate.getMonth() + 1).padStart(2, '0')} {String(selectedDate.getDate()).padStart(2, '0')}
+                        {String(selectedDate.getDate()).padStart(2, '0')}.{String(selectedDate.getMonth() + 1).padStart(2, '0')}.{event.godina}.
                       </span>
                     </div>
                     <div className="flex items-center gap-3">

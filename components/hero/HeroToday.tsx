@@ -119,31 +119,9 @@ export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
           </p>
         </motion.div>
 
-        {/* Mobile Layout: Prevuci chip -> Date switch -> Events */}
+        {/* Mobile Layout: Date switch -> Events */}
         <div className="lg:hidden">
-          {/* Mobile Scroll Indicator */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-center mb-6"
-          >
-            <div className="inline-flex items-center gap-2 text-white/80 text-sm bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
-              <div className="flex items-center gap-1">
-                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse"></div>
-                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-              </div>
-              <span>Prevuci za više događaja</span>
-              <div className="flex items-center gap-1">
-                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse"></div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Date chip with navigation - Mobile: below Prevuci chip */}
+          {/* Date chip with navigation - Mobile */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -218,6 +196,30 @@ export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
             />
           )}
         </motion.div>
+
+        {/* Mobile Scroll Indicator - below events */}
+        <div className="lg:hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="text-center mb-6"
+          >
+            <div className="inline-flex items-center gap-2 text-white/80 text-sm bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
+              <div className="flex items-center gap-1">
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse"></div>
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+              <span>Prevuci za više događaja</span>
+              <div className="flex items-center gap-1">
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
 
         {/* Desktop Layout: Events -> Date switch */}
         <div className="hidden lg:block">

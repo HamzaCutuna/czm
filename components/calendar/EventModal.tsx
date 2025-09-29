@@ -18,11 +18,11 @@ export default function EventModal({ open, event, onOpenChange, selectedDate = n
           <div className="bg-white">
             <DialogHeader>
               <DialogTitle className="sr-only">
-                Historijski događaj - {event.year} {String(selectedDate.getMonth() + 1).padStart(2, '0')} {String(selectedDate.getDate()).padStart(2, '0')}
+                Historijski događaj - {String(selectedDate.getDate()).padStart(2, '0')}.{String(selectedDate.getMonth() + 1).padStart(2, '0')}.{event.year}.
               </DialogTitle>
               <div className="flex items-center gap-3 mb-4">
                 <span className="px-3 py-1 text-sm rounded-full font-semibold bg-stone-100 text-stone-800 border border-stone-200">
-                  {event.year} {String(selectedDate.getMonth() + 1).padStart(2, '0')} {String(selectedDate.getDate()).padStart(2, '0')}
+                  {String(selectedDate.getDate()).padStart(2, '0')}.{String(selectedDate.getMonth() + 1).padStart(2, '0')}.{event.year}.
                 </span>
                 <span className="px-3 py-1 text-sm rounded-full font-semibold bg-[--color-primary] text-white">
                   {event.category}

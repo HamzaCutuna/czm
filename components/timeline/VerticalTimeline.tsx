@@ -19,51 +19,63 @@ interface TimelineItem {
 
 const timelineData: TimelineItem[] = [
   {
-    year: "2024",
-    title: "Početak projekta",
-    description: "Formiranje tima i definisanje ciljeva platforme Historija TV",
+    year: "24.2.2025",
+    title: "Prvi sastanak u Centru za mir i multietničku saradnju",
+    description: "Održan je inicijalni sastanak na kojem je predstavljena ideja digitalizacije dokumenata Centra za mir i multietničku saradnju. Razgovaralo se o značaju digitalnog očuvanja građe, mogućim tehničkim rješenjima i narednim koracima u procesu pripreme projekta.",
     status: "completed"
   },
   {
-    year: "2024", 
-    title: "Razvoj MVP",
-    description: "Kreiranje osnovnih funkcionalnosti i dizajn sistema",
+    year: "14.3.2025", 
+    title: "Potpisan memorandum o razumijevanju (CZM – FIT)",
+    description: "Na Fakultetu informacijskih tehnologija potpisan je memorandum o razumijevanju između FIT-a i CZM-a. Memorandum su potpisali dekan prof. dr. Nina Bijedić i direktor Centra gospodin Safet Oručević, čime je zvanično potvrđena saradnja na zajedničkom radu na započetom procesu digitalizacije kulturno-historijskog naslijeđa.",
     status: "completed"
   },
   {
-    year: "2024",
-    title: "Beta testiranje",
-    description: "Testiranje sa ograničenim brojem korisnika i prikupljanje povratnih informacija",
+    year: "17.4.2025",
+    title: "Predstavljanje istraživanja",
+    description: "Studenti FIT-a su prezentirali svoje istraživanje koje se oslanjalo na postojeće historijske kalendare, muzejske sadržaje i interaktivne alate za kviz. Cilj istraživačkog rada bio je dati mišljenje i smjernice za oblikovanje projekta, a vodio se i razgovor na definisanju zajedničkih ciljeva i dogovoreni naredni koraci.",
     status: "completed"
   },
   {
-    year: "2024",
-    title: "Lansiranje",
-    description: "Javno lansiranje platforme sa svim osnovnim funkcionalnostima",
+    year: "26.7.2025",
+    title: "Predstavljanje urađenog dijela web aplikacije",
+    description: "Na sastanku je prikazan dosadašnji rad – kompletiran backend sistem i prototip najvažnijih pregleda funkcionalnosti. Tokom prezentacije zajednički je razmotreno šta je do sada urađeno i zaključeno je koje segmente je još potrebno nadimati kako bi web aplikacija bila u potpunosti zaokružena.",
+    status: "completed"
+  },
+  {
+    year: "August 2025",
+    title: "Završni radovi na bazi i finalni dio frontenda",
+    description: "Dovršeno je unošenje većeg broja događaja iz knjige TV kalendara u bazu podataka, čime je kreiran čvrst temelj za dalje digitalno očuvanje. Studenti su nastavili rad na finalnoj verziji frontenda web aplikacije. Uključivale su se nadogradnje vezane za optimizaciju i performanse, mijenjanje i prilagođavanje nedostataka na već postojećem backendu, kao i dodatak na integraciji jedinstvenog korisničkog iskustva.",
     status: "current"
   },
   {
     year: "2025",
+    title: "Finalno testiranje i optimizacija",
+    description: "Kompletno testiranje svih funkcionalnosti, optimizacija performansi i priprema za javno lansiranje platforme.",
+    status: "upcoming"
+  },
+  {
+    year: "2026",
+    title: "Javno lansiranje",
+    description: "Oficijelno lansiranje Historija TV platforme za širu javnost sa svim osnovnim funkcionalnostima.",
+    status: "upcoming"
+  },
+  {
+    year: "2026",
     title: "Proširenje sadržaja",
-    description: "Dodavanje novih historijskih tema i interaktivnih sadržaja",
+    description: "Dodavanje novih historijskih tema, interaktivnih sadržaja i integracija sa muzejskim kolekcijama.",
     status: "upcoming"
   },
   {
-    year: "2025",
+    year: "2026",
     title: "Mobilna aplikacija",
-    description: "Razvoj native mobilne aplikacije za iOS i Android",
+    description: "Razvoj native mobilne aplikacije za iOS i Android platforme.",
     status: "upcoming"
   },
   {
-    year: "2025",
+    year: "2026",
     title: "AI integracija",
-    description: "Implementacija AI asistenta za personalizovano učenje",
-    status: "upcoming"
-  },
-  {
-    year: "2025",
-    title: "Međunarodno proširenje",
-    description: "Lokalizacija platforme za druge jezike i regione",
+    description: "Implementacija AI asistenta za personalizovano učenje i preporuke sadržaja.",
     status: "upcoming"
   }
 ];
