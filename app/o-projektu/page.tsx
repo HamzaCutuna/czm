@@ -130,7 +130,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;[placeholder]&rdquo;
+                    &ldquo;Smatram da je od izrazite važnosti za naše društvo, a posebno mlađe generacije, postojanje ove stranice sa ciljem podsticanja interesa ljudi za proučavanje historije, s fokusom na historiju Bosne i Hercegovine. Poznavanje vlastite prošlosti je ključni element očuvanja kulturnog identiteta naroda.&rdquo;
                   </p>
                 </CardContent>
               </Card>
