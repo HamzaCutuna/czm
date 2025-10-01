@@ -338,7 +338,7 @@ export default function OProjektuPage() {
                     </div>
                   </div>
                   <p className="text-stone-600 leading-relaxed">
-                    &ldquo;[placeholder]&rdquo;
+                    &ldquo;Rad na projektu očuvanja kulturne baštine i historije Mostara za mene predstavlja priliku da se aktivno doprinese očuvanju sjećanja i naslijeđa za buduće generacije. Svjesni smo da globalizacija i brzi razvoj često stavljaju pod prijetnju autentične vrijednosti, a naš zadatak je da ih zaštitimo, dokumentujemo i učinimo dostupnim svima.&rdquo;
                   </p>
                 </CardContent>
               </Card>
