@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabase, checkDailyChallengeClaimed } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the Authorization header
+    // Check for Authorization header
     const authHeader = request.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
-        { error: 'Unauthorized - No valid token' },
+        { error: 'Unauthorized - Please sign in to check daily challenge status' },
         { status: 401 }
       );
     }
 
     const token = authHeader.replace('Bearer ', '');
-    
+
     // Verify the token and get user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+
     if (authError || !user) {
       console.error('Auth error:', authError);
       return NextResponse.json(
@@ -25,40 +25,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check if user already attempted today's daily challenge
-    const today = new Date().toISOString().split('T')[0];
-    
-    if (!supabaseAdmin) {
-      console.error('Supabase admin client not available');
+    // Check if user already claimed today's daily challenge
+    const { data: claimData, error: claimError } = await checkDailyChallengeClaimed();
+
+    if (claimError) {
+      console.error('Error checking daily challenge claim:', claimError);
       return NextResponse.json(
-        { error: 'Server configuration error - admin client not available' },
+        { error: 'Failed to check daily challenge status', details: claimError.message },
         { status: 500 }
       );
     }
-    
-    const { data: existingAttempt, error: attemptError } = await supabaseAdmin
-      .from('quiz_sessions')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('game_type', 'dnevni_izazov')
-      .gte('created_at', today)
-      .maybeSingle();
-
-    if (attemptError) {
-      console.error('Error checking existing attempt:', attemptError);
-      return NextResponse.json(
-        { error: 'Failed to check existing attempt', details: attemptError.message },
-        { status: 500 }
-      );
-    }
-
-    const alreadyAttempted = !!existingAttempt;
 
     return NextResponse.json({
       success: true,
-      alreadyAttempted,
+      alreadyClaimed: claimData?.claimed || false,
       userId: user.id,
-      today
+      today: new Date().toISOString().split('T')[0]
     });
 
   } catch (error) {

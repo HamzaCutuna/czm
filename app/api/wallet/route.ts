@@ -3,12 +3,24 @@ import { supabase } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
+    // Check for Authorization header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify the token and get user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      return NextResponse.json(
+        { error: 'Unauthorized - Invalid token' },
         { status: 401 }
       );
     }
@@ -46,7 +58,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      wallet: wallet || { diamonds_balance: 0 },
+      wallet: wallet || { diamonds: 0 },
       transactions: transactions || []
     });
 

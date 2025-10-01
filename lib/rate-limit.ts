@@ -96,19 +96,25 @@ export const RATE_LIMITS = {
     maxRequests: 5,
     windowMs: 60 * 1000, // 1 minute
   },
-  
+
+  // Daily challenge claim - 3 requests per day per user (very restrictive)
+  DAILY_CHALLENGE_CLAIM: {
+    maxRequests: 3,
+    windowMs: 24 * 60 * 60 * 1000, // 24 hours
+  },
+
   // Wallet spend - 10 requests per minute per user
   WALLET_SPEND: {
     maxRequests: 10,
     windowMs: 60 * 1000, // 1 minute
   },
-  
+
   // Leaderboard - 20 requests per minute per user
   LEADERBOARD: {
     maxRequests: 20,
     windowMs: 60 * 1000, // 1 minute
   },
-  
+
   // Wallet info - 30 requests per minute per user
   WALLET_INFO: {
     maxRequests: 30,

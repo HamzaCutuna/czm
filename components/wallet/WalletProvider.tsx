@@ -1,25 +1,20 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase, getWallet, getTransactions } from '@/lib/supabase';
+import { supabase, getWallet, getTransactions, walletIncrement, walletSpend } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 export interface Wallet {
-  id: string;
   user_id: string;
-  diamonds_balance: number;
-  created_at: string;
+  diamonds: number;
   updated_at: string;
 }
 
 export interface Transaction {
   id: string;
-  wallet_id: string;
   user_id: string;
-  amount: number;
-  direction: 'earn' | 'spend';
-  source: string;
-  quiz_session_id?: string;
+  delta: number;
+  reason: string;
   metadata: any;
   created_at: string;
 }
@@ -157,8 +152,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       // Check if wallet already exists
       console.log('Checking if wallet exists...');
       const { data: existingWallet, error: walletError } = await supabase
-        .from('user_wallets')
-        .select('id')
+        .from('wallet_balances')
+        .select('user_id')
         .eq('user_id', user.id)
         .single();
 
@@ -168,10 +163,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         // Wallet doesn't exist, create it
         console.log('Creating wallet for user:', user.id);
         const { error: createError } = await supabase
-          .from('user_wallets')
+          .from('wallet_balances')
           .insert({
             user_id: user.id,
-            diamonds_balance: 0
+            diamonds: 0
           });
 
         if (createError) {
@@ -245,11 +240,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const grant = async (amount: number, reason: string, metadata?: any): Promise<boolean> => {
     try {
-      const { data, error } = await supabase.rpc('wallet_grant', {
-        p_amount: amount,
-        p_reason: reason,
-        p_metadata: metadata || {},
-      });
+      const { data, error } = await walletIncrement(amount, reason, metadata);
 
       if (error) {
         toast.error(`Error granting diamonds: ${error.message}`);
@@ -268,11 +259,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const spend = async (amount: number, reason: string, metadata?: any): Promise<boolean> => {
     try {
-      const { data, error } = await supabase.rpc('wallet_spend', {
-        p_amount: amount,
-        p_reason: reason,
-        p_metadata: metadata || {},
-      });
+      const { data, error } = await walletSpend(amount, reason, metadata);
 
       if (error) {
         toast.error(`Error spending diamonds: ${error.message}`);
@@ -290,7 +277,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   };
 
   const canAfford = (amount: number): boolean => {
-    return wallet ? wallet.diamonds_balance >= amount : false;
+    return wallet ? wallet.diamonds >= amount : false;
   };
 
   const contextValue: WalletContextType = {

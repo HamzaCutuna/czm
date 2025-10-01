@@ -204,8 +204,8 @@ export async function POST(request: NextRequest) {
     if (diamondsEarned > 0) {
       // Get current wallet
       const { data: wallet, error: walletError } = await supabaseAdmin
-        .from('user_wallets')
-        .select('id, diamonds_balance')
+        .from('wallet_balances')
+        .select('user_id, diamonds')
         .eq('user_id', user.id)
         .single();
 
@@ -219,13 +219,13 @@ export async function POST(request: NextRequest) {
 
       // Update wallet balance
       const { data: updatedWallet, error: updateError } = await supabaseAdmin
-        .from('user_wallets')
-        .update({ 
-          diamonds_balance: wallet.diamonds_balance + diamondsEarned,
+        .from('wallet_balances')
+        .update({
+          diamonds: wallet.diamonds + diamondsEarned,
           updated_at: new Date().toISOString()
         })
-        .eq('id', wallet.id)
-        .select('diamonds_balance')
+        .eq('user_id', user.id)
+        .select('diamonds')
         .single();
 
       if (updateError) {
@@ -236,34 +236,32 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Create ledger entry
+      // Create transaction record
       const { error: ledgerError } = await supabaseAdmin
-        .from('diamond_ledger')
+        .from('wallet_transactions')
         .insert({
           user_id: user.id,
-          wallet_id: wallet.id,
-          amount: diamondsEarned,
-          direction: 'earn',
-          source: 'tacno_netacno',
-          metadata: { session_id: session.id, ...sessionData }
+          delta: diamondsEarned,
+          reason: 'quiz_reward',
+          metadata: { session_id: session.id, source: 'tacno_netacno', ...sessionData }
         });
 
       if (ledgerError) {
-        console.error('Error creating ledger entry:', ledgerError);
+        console.error('Error creating transaction record:', ledgerError);
         // Don't fail the request, just log the error
-        console.warn('Ledger entry failed but wallet was updated');
+        console.warn('Transaction record failed but wallet was updated');
       }
 
-      newBalance = updatedWallet.diamonds_balance;
+      newBalance = updatedWallet.diamonds;
     } else {
       // Get current balance even if no diamonds earned - use admin client
       const { data: wallet } = await supabaseAdmin
-        .from('user_wallets')
-        .select('diamonds_balance')
+        .from('wallet_balances')
+        .select('diamonds')
         .eq('user_id', user.id)
         .single();
-      
-      newBalance = wallet?.diamonds_balance || 0;
+
+      newBalance = wallet?.diamonds || 0;
     }
 
     // Return success response

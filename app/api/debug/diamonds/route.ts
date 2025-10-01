@@ -4,9 +4,20 @@ import { calculateDiamondsReward, DEFAULT_REWARDS_CONFIG } from '@/lib/rewards-c
 
 export async function GET(request: NextRequest) {
   try {
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    // Check for Authorization header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({
+        error: 'Unauthorized',
+        authError: 'No valid authorization header'
+      });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify the token and get user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
     if (authError || !user) {
       return NextResponse.json({
         error: 'Unauthorized',
@@ -51,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     // Get wallet info
     const { data: wallet, error: walletError } = await supabase
-      .from('user_wallets')
+      .from('wallet_balances')
       .select('*')
       .eq('user_id', user.id)
       .single();
@@ -60,10 +71,10 @@ export async function GET(request: NextRequest) {
       // Wallet doesn't exist, create it
       console.log('Debug: Creating wallet for user:', user.id);
       const { data: newWallet, error: createWalletError } = await supabase
-        .from('user_wallets')
+        .from('wallet_balances')
         .insert({
           user_id: user.id,
-          diamonds_balance: 0
+          diamonds: 0
         })
         .select()
         .single();
@@ -81,7 +92,7 @@ export async function GET(request: NextRequest) {
 
     // Get final wallet data
     const { data: finalWallet, error: finalWalletError } = await supabase
-      .from('user_wallets')
+      .from('wallet_balances')
       .select('*')
       .eq('user_id', user.id)
       .single();

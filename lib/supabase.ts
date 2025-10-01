@@ -16,7 +16,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    flowType: 'pkce'
+    flowType: 'pkce',
+    // Add debug logging
+    debug: true
   }
 });
 
@@ -87,76 +89,92 @@ export const getCurrentUser = async () => {
   return { user, error };
 };
 
-// Wallet RPC functions
-export const walletGrant = async (amount: number, reason: string, metadata?: any) => {
-  const { data, error } = await supabase.rpc('wallet_grant', {
+// Updated Wallet RPC functions using new naming
+export const walletIncrement = async (amount: number, reason: string, metadata?: any) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { data: null, error: { message: 'User not authenticated' } };
+  }
+
+  const { data, error } = await supabase.rpc('wallet_increment', {
+    p_user: user.id,
     p_amount: amount,
     p_reason: reason,
     p_metadata: metadata || {},
   });
-  
+
   if (error && handleAuthError(error)) {
     return { data: null, error: { message: 'Session expired. Please sign in again.' } };
   }
-  
+
   return { data, error };
 };
 
 export const walletSpend = async (amount: number, reason: string, metadata?: any) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { data: null, error: { message: 'User not authenticated' } };
+  }
+
   const { data, error } = await supabase.rpc('wallet_spend', {
+    p_user: user.id,
     p_amount: amount,
     p_reason: reason,
     p_metadata: metadata || {},
   });
-  
-  if (error && handleAuthError(error)) {
-    return { data: null, error: { message: 'Session expired. Please sign in again.' } };
+
+  if (error) {
+    if (handleAuthError(error)) {
+      return { data: null, error: { message: 'Session expired. Please sign in again.' } };
+    }
+    return { data: null, error };
   }
-  
-  return { data, error };
+
+  // The database function returns a boolean, not an object with data property
+  return { data: data, error: null };
 };
 
-export const completeDailyChallenge = async (isCorrect: boolean) => {
-  const { data, error } = await supabase.rpc('complete_daily_challenge', {
-    p_is_correct: isCorrect,
-  });
-  
-  if (error && handleAuthError(error)) {
-    return { data: null, error: { message: 'Session expired. Please sign in again.' } };
-  }
-  
-  return { data, error };
-};
-
-export const finishTrueFalseRound = async (
-  totalQuestions: number, 
-  correctAnswers: number, 
-  durationMs: number = 0,
-  sessionData: any = {}
+export const finalizeQuiz = async (
+  mode: string,
+  questionCount: number,
+  correctCount: number,
+  durationMs: number = 0
 ) => {
-  const { data, error } = await supabase.rpc('finish_true_false_round', {
-    p_total_questions: totalQuestions,
-    p_correct_answers: correctAnswers,
+  const { data, error } = await supabase.rpc('finalize_quiz', {
+    p_mode: mode,
+    p_question_count: questionCount,
+    p_correct_count: correctCount,
     p_duration_ms: durationMs,
-    p_session_data: sessionData,
   });
-  
+
   if (error && handleAuthError(error)) {
     return { data: null, error: { message: 'Session expired. Please sign in again.' } };
   }
-  
+
   return { data, error };
 };
 
-// Data fetching functions
+export const claimDailyChallenge = async (answerId: string) => {
+  const { data, error } = await supabase.rpc('claim_daily_challenge', {
+    p_answer_id: answerId,
+  });
+
+  if (error && handleAuthError(error)) {
+    return { data: null, error: { message: 'Session expired. Please sign in again.' } };
+  }
+
+  return { data, error };
+};
+
+// Updated data fetching functions using new table names
 export const getWallet = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return { data: null, error: { message: 'User not authenticated' } };
   }
-  
+
   const { data, error } = await supabase
-    .from('user_wallets')
+    .from('wallet_balances')
     .select('*')
     .eq('user_id', user.id)
     .single();
@@ -168,9 +186,9 @@ export const getTransactions = async (limit = 20, offset = 0) => {
   if (!user) {
     return { data: null, error: { message: 'User not authenticated' } };
   }
-  
+
   const { data, error } = await supabase
-    .from('diamond_ledger')
+    .from('wallet_transactions')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
@@ -178,51 +196,90 @@ export const getTransactions = async (limit = 20, offset = 0) => {
   return { data, error };
 };
 
-export const getDailyChallengeStatus = async () => {
-  const { data, error } = await supabase
-    .from('daily_challenges')
-    .select('*')
-    .eq('challenge_date', new Date().toISOString().split('T')[0])
-    .single();
-  return { data, error };
+export const getDailyChallenge = async () => {
+  // For now, return a placeholder - this would be implemented with actual daily challenges
+  const today = new Date().toISOString().split('T')[0];
+  return {
+    data: {
+      id: 'daily-challenge-' + today,
+      challengeDate: today,
+      question: 'What year was the Berlin Wall built?',
+      options: [
+        { id: '1', text: '1961' },
+        { id: '2', text: '1962' },
+        { id: '3', text: '1963' },
+        { id: '4', text: '1964' }
+      ],
+      correctAnswerId: '1',
+      alreadyClaimed: false
+    },
+    error: null
+  };
 };
 
-export const getTrueFalseRoundStatus = async () => {
+export const checkDailyChallengeClaimed = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { data: null, error: { message: 'User not authenticated' } };
+  }
+
+  const today = new Date().toISOString().split('T')[0];
   const { data, error } = await supabase
-    .from('true_false_rounds')
+    .from('daily_challenge_claims')
     .select('*')
-    .eq('round_date', new Date().toISOString().split('T')[0])
+    .eq('user_id', user.id)
+    .eq('challenge_date', today)
     .single();
+
+  // If no record exists, user hasn't claimed yet
+  if (error && error.code === 'PGRST116') {
+    return { data: { claimed: false }, error: null };
+  }
+
+  return { data: { claimed: !!data }, error };
+};
+
+export const getLeaderboard = async (period: string = '30', page: number = 1, pageSize: number = 20) => {
+  const { data, error } = await supabase.rpc('get_leaderboard', {
+    p_period: period,
+    p_page: page,
+    p_page_size: pageSize
+  });
+
+  if (error && handleAuthError(error)) {
+    return { data: null, error: { message: 'Session expired. Please sign in again.' } };
+  }
+
   return { data, error };
 };
 
 // New API functions for the rewards system
 export const spendDiamonds = async (helpType: string, metadata: any = {}) => {
+  // Get the current session token for authentication
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session?.access_token) {
+    return {
+      data: null,
+      error: { message: 'User not authenticated. Please sign in to use power-ups.' }
+    };
+  }
+
   const response = await fetch('/api/wallet/spend', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
     },
     body: JSON.stringify({ helpType, metadata }),
   });
-  
+
   if (!response.ok) {
     const error = await response.json();
     return { data: null, error };
   }
-  
+
   const data = await response.json();
   return { data, error: null };
 };
 
-export const getLeaderboard = async (scope: string = 'daily', page: number = 1, pageSize: number = 20) => {
-  const response = await fetch(`/api/leaderboard?scope=${scope}&page=${page}&pageSize=${pageSize}`);
-  
-  if (!response.ok) {
-    const error = await response.json();
-    return { data: null, error };
-  }
-  
-  const data = await response.json();
-  return { data, error: null };
-};

@@ -1,16 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, walletSpend } from '@/lib/supabase';
 import { DEFAULT_REWARDS_CONFIG } from '@/lib/rewards-config';
 import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
+    // Check for Authorization header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized - Please sign in to use power-ups' },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify the token and get user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      return NextResponse.json(
+        { error: 'Unauthorized - Invalid token' },
         { status: 401 }
       );
     }
@@ -19,14 +31,14 @@ export async function POST(request: NextRequest) {
     const rateLimitResult = checkRateLimit(user.id, 'WALLET_SPEND', request);
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
-        { 
+        {
           error: 'Rate limit exceeded. Please try again later.',
-          resetTime: rateLimitResult.resetTime 
+          resetTime: rateLimitResult.resetTime
         },
-        { 
+        {
           status: 429,
           headers: {
-            'Retry-After': rateLimitResult.resetTime ? 
+            'Retry-After': rateLimitResult.resetTime ?
               Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString() : '60'
           }
         }
@@ -40,19 +52,19 @@ export async function POST(request: NextRequest) {
     // Validate help type and get cost
     let cost = 0;
     let reason = '';
-    
+
     switch (helpType) {
       case 'fiftyFifty':
         cost = DEFAULT_REWARDS_CONFIG.HELP_COSTS.fiftyFifty;
-        reason = 'help';
+        reason = 'powerup_5050';
         break;
       case 'skip':
         cost = DEFAULT_REWARDS_CONFIG.HELP_COSTS.skip;
-        reason = 'help';
+        reason = 'powerup_skip';
         break;
       case 'removeOne':
         cost = DEFAULT_REWARDS_CONFIG.HELP_COSTS.removeOne;
-        reason = 'help';
+        reason = 'powerup_remove';
         break;
       default:
         return NextResponse.json(
@@ -61,34 +73,51 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    // Spend diamonds
-    const { data: spendResult, error: spendError } = await supabase.rpc('wallet_spend', {
-      p_amount: cost,
-      p_reason: reason,
-      p_metadata: { help_type: helpType, ...metadata }
+    // Spend diamonds using the new RPC function
+    const { data: spendResult, error: spendError } = await walletSpend(cost, reason, {
+      help_type: helpType,
+      ...metadata
     });
 
     if (spendError) {
-      if (spendError.message?.includes('Insufficient diamonds')) {
+      console.error('Error spending diamonds:', spendError);
+
+      if (spendError.message?.includes('Insufficient diamonds') || spendError.message?.includes('insufficient')) {
         return NextResponse.json(
-          { error: 'Insufficient diamonds' },
-          { status: 400 }
+          { ok: false, error: 'INSUFFICIENT_FUNDS' },
+          { status: 402 } // Payment Required
         );
       }
-      
-      console.error('Error spending diamonds:', spendError);
+
       return NextResponse.json(
-        { error: 'Failed to spend diamonds' },
+        { ok: false, error: 'Failed to spend diamonds' },
         { status: 500 }
       );
     }
 
+    // Check if the spend was successful (spendResult is a boolean)
+    if (!spendResult) {
+      return NextResponse.json(
+        { ok: false, error: 'INSUFFICIENT_FUNDS' },
+        { status: 402 } // Payment Required
+      );
+    }
+
+    // Refresh wallet data to get updated balance
+    const { data: walletData } = await supabase
+      .from('wallet_balances')
+      .select('diamonds')
+      .eq('user_id', user.id)
+      .single();
+
+    const newBalance = walletData?.diamonds || 0;
+
     return NextResponse.json({
-      success: true,
-      newBalance: spendResult.new_balance,
+      ok: true,
+      totalBalance: newBalance,
       helpType,
       cost,
-      ledgerId: spendResult.ledger_id
+      success: true
     });
 
   } catch (error) {

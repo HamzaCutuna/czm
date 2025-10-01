@@ -235,9 +235,7 @@ function TrueFalseGame() {
 
   const questionCountOptions = [
     { value: 5, label: "5 pitanja" },
-    { value: 10, label: "10 pitanja" },
-    { value: 15, label: "15 pitanja" },
-    { value: 20, label: "20 pitanja" }
+    { value: 10, label: "10 pitanja" }
   ];
 
   const getSelectedRegionLabel = () => {
@@ -369,11 +367,11 @@ function TrueFalseGame() {
           }
 
           // Call the new API endpoint with timeout
-          console.log('Making API call to /api/quiz/tf/finalize...');
-          
+          console.log('Making API call to finalize quiz...');
+
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-          
+
           const response = await fetch('/api/quiz/tf/finalize', {
             method: 'POST',
             headers: {
@@ -381,39 +379,46 @@ function TrueFalseGame() {
               'Authorization': `Bearer ${authSession.access_token}`,
             },
             body: JSON.stringify({
+              sessionId: `tf_${Date.now()}_${user.id}`,
               totalQuestions: session.questions.length,
               correctAnswers: session.score,
-              durationMs,
-              sessionData: { questions: session.questions.map(q => ({ text: q.text, isTrue: q.isTrue })) }
+              durationMs
             }),
             signal: controller.signal
           });
-          
+
           clearTimeout(timeoutId);
           console.log('API call completed, response status:', response.status);
-          
+
           const result = await response.json();
-          
+
           console.log('API response:', {
             ok: response.ok,
             status: response.status,
             result
           });
-          
+
           if (!response.ok) {
             console.error('API error:', result);
             toast.error(`Error: ${result.error}`);
-          } else if (result.diamondsEarned > 0) {
-            console.log('Diamonds earned:', result.diamondsEarned);
-            toast.success(`+${result.diamondsEarned} 💎 nagrađeno!`);
+          } else {
+            // Store the result for display in the finished state
+            (window as any).quizResult = result;
+            console.log('Quiz result stored:', result);
+
+            if (result.diamondsEarned > 0) {
+              console.log('Diamonds earned:', result.diamondsEarned);
+              toast.success(`+${result.diamondsEarned} 💎 zaradili ste!`);
+            } else if (result.rewardedToday) {
+              console.log('Already rewarded today');
+              toast.info("Već ste dobili nagradu danas - nema dodatne nagrade");
+            } else {
+              console.log('No reward - conditions not met');
+              toast.info("Igra završena - nema nagrade za ovaj pokušaj");
+            }
+
             // Refresh wallet to show updated balance
             await refreshWallet();
-          } else if (result.rewardedToday) {
-            console.log('Already rewarded today');
-            toast.info("Igra završena - već ste dobili nagradu danas");
-          } else {
-            console.log('No reward - conditions not met');
-            toast.info("Igra završena - nema nagrade za ovaj pokušaj");
           }
         } catch (error: any) {
           console.error('API call error:', error);
@@ -470,6 +475,7 @@ function TrueFalseGame() {
 
   if (gameState === 'finished') {
     const percentage = session ? Math.round((session.score / session.questions.length) * 100) : 0;
+    const quizResult = (window as any).quizResult;
 
     return (
       <main className="container mx-auto px-4 py-16 bg-[--color-bg]">
@@ -485,23 +491,57 @@ function TrueFalseGame() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center">
-                <div className={`text-6xl font-bold mb-2 ${getScoreColor(percentage)} quiz-score`}>
+                <div className={`text-6xl font-bold mb-4 ${getScoreColor(percentage)} quiz-score`}>
                   {percentage}%
                 </div>
-                
-                {/* Diamonds Display */}
-                {wallet && (
-                  <div className="mt-4 flex justify-center">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-amber-200 rounded-full border border-amber-300">
-                      <div className="text-xl">💎</div>
-                      <div className="text-lg font-bold text-amber-800">
-                        {wallet.diamonds_balance}
-                      </div>
-                      <div className="text-sm text-amber-600">dijamanata</div>
+
+                {/* Diamonds Display - Show earned vs total */}
+                <div className="space-y-3">
+                  {/* Show earned diamonds (always shown) */}
+                  <div className="text-center">
+                    <div className="text-sm text-stone-600 mb-1">Zaradili ste:</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      +{quizResult?.diamondsEarned || 0} 💎
                     </div>
                   </div>
-                )}
+
+                  {/* Show total balance only if logged in */}
+                  {user ? (
+                    wallet ? (
+                      <div className="text-center">
+                        <div className="text-sm text-stone-600 mb-1">Ukupno dijamanata:</div>
+                        <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-amber-200 rounded-full border border-amber-300">
+                          <div className="text-xl">💎</div>
+                          <div className="text-lg font-bold text-amber-800">
+                            {wallet.diamonds}
+                          </div>
+                          <div className="text-sm text-amber-600">dijamanata</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <div className="text-sm text-stone-600 mb-1">Ukupno dijamanata:</div>
+                        <div className="text-sm text-stone-500">Učitavanje...</div>
+                      </div>
+                    )
+                  ) : (
+                    <div className="text-center">
+                      <div className="text-sm text-stone-500 italic">
+                        Prijavite se da biste prikupljali nagrade
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Show message if already played today */}
+              {quizResult?.rewardedToday && (
+                <div className="text-center p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    Već ste dobili nagradu danas. Nagrade se dodjeljuju jednom dnevno.
+                  </p>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg text-center shadow-sm">
@@ -686,7 +726,7 @@ function TrueFalseGame() {
               <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-amber-200 rounded-full border border-amber-300">
                 <div className="text-2xl">💎</div>
                 <div className="text-lg font-bold text-amber-800">
-                  {wallet.diamonds_balance}
+                  {wallet?.diamonds || 0}
                 </div>
                 <div className="text-sm text-amber-600">dijamanata</div>
               </div>

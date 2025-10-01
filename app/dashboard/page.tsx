@@ -27,19 +27,21 @@ import { toast } from "sonner";
 
 interface Profile {
   id: string;
+  email: string | null;
   full_name: string | null;
+  display_name: string | null;
   avatar_url: string | null;
-  diamond_balance: number;
+  privacy_setting: string | null;
   created_at: string;
 }
 
 interface QuizResult {
   id: string;
-  quiz_key: string;
-  score_percent: number;
+  mode: string;
+  question_count: number;
   correct_count: number;
-  total_count: number;
   duration_ms: number;
+  played_on: string;
   created_at: string;
 }
 
@@ -80,9 +82,10 @@ export default function DashboardPage() {
               .from('profiles')
               .insert({
                 id: user.id,
+                email: user.email || null,
                 full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
-                avatar_url: user.user_metadata?.avatar_url || null,
-                diamond_balance: 0
+                display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
+                avatar_url: user.user_metadata?.avatar_url || null
               })
               .select()
               .single();
@@ -101,9 +104,10 @@ export default function DashboardPage() {
             .from('profiles')
             .insert({
               id: user.id,
+              email: user.email || null,
               full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
-              avatar_url: user.user_metadata?.avatar_url || null,
-              diamond_balance: 0
+              display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
+              avatar_url: user.user_metadata?.avatar_url || null
             })
             .select()
             .single();
@@ -113,9 +117,11 @@ export default function DashboardPage() {
             // If profile creation fails, create a fallback profile
             setProfile({
               id: user.id,
+              email: user.email || null,
               full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
+              display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
               avatar_url: user.user_metadata?.avatar_url || null,
-              diamond_balance: 0,
+              privacy_setting: 'realname',
               created_at: new Date().toISOString()
             });
           } else {
@@ -125,16 +131,16 @@ export default function DashboardPage() {
         
         // Fetch quiz results
         const { data: quizData, error: quizError } = await supabase
-          .from('quiz_results')
+          .from('quiz_sessions')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
-        
+
         if (quizError) {
-          console.error('Quiz results error:', quizError);
+          console.error('Quiz sessions error:', quizError);
           // If it's a permission error or table doesn't exist, just set empty array
           if (quizError.code === '42501' || quizError.code === '42P01' || quizError.message?.includes('permission') || quizError.message?.includes('does not exist')) {
-            console.log('Quiz results table not accessible, setting empty array');
+            console.log('Quiz sessions table not accessible, setting empty array');
             setQuizResults([]);
           }
         } else {
@@ -146,9 +152,11 @@ export default function DashboardPage() {
         if (!profile) {
           setProfile({
             id: user.id,
+            email: user.email || null,
             full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
+            display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
             avatar_url: user.user_metadata?.avatar_url || null,
-            diamond_balance: 0,
+            privacy_setting: 'realname',
             created_at: new Date().toISOString()
           });
         }
@@ -267,7 +275,7 @@ export default function DashboardPage() {
             <CardContent className="text-center">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Gem className="h-8 w-8 text-blue-600" />
-                <span className="text-4xl font-bold text-blue-700">{profile?.diamond_balance || wallet?.diamonds_balance || 0}</span>
+                <span className="text-4xl font-bold text-blue-700">{wallet?.diamonds || 0}</span>
                 <span className="text-xl text-blue-600">💎</span>
               </div>
               <p className="text-blue-600">
@@ -310,33 +318,36 @@ export default function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {quizResults.map((result) => (
-                        <tr key={result.id} className="border-b border-stone-100 hover:bg-white/50">
-                          <td className="py-3 px-4 font-medium text-stone-800">
-                            {result.quiz_key}
-                          </td>
-                          <td className="py-3 px-4">
-                            <Badge 
-                              variant={result.score_percent >= 80 ? "default" : result.score_percent >= 60 ? "secondary" : "destructive"}
-                              className="font-semibold"
-                            >
-                              {result.score_percent.toFixed(1)}%
-                            </Badge>
-                          </td>
-                          <td className="py-3 px-4 text-stone-600">
-                            {result.correct_count}/{result.total_count}
-                          </td>
-                          <td className="py-3 px-4 text-stone-600">
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              {formatDuration(result.duration_ms)}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-stone-600">
-                            {formatDate(result.created_at)}
-                          </td>
-                        </tr>
-                      ))}
+                      {quizResults.map((result) => {
+                        const scorePercent = result.question_count > 0 ? (result.correct_count / result.question_count) * 100 : 0;
+                        return (
+                          <tr key={result.id} className="border-b border-stone-100 hover:bg-white/50">
+                            <td className="py-3 px-4 font-medium text-stone-800">
+                              {result.mode === 'true_false' ? 'Tačno/Netačno' : 'Kviz'}
+                            </td>
+                            <td className="py-3 px-4">
+                              <Badge
+                                variant={scorePercent >= 80 ? "default" : scorePercent >= 60 ? "secondary" : "destructive"}
+                                className="font-semibold"
+                              >
+                                {scorePercent.toFixed(1)}%
+                              </Badge>
+                            </td>
+                            <td className="py-3 px-4 text-stone-600">
+                              {result.correct_count}/{result.question_count}
+                            </td>
+                            <td className="py-3 px-4 text-stone-600">
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {formatDuration(result.duration_ms)}
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-stone-600">
+                              {formatDate(result.created_at)}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

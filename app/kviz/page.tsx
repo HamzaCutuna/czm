@@ -114,7 +114,8 @@ export default function KvizPage() {
   const questionCountOptions = [
     { value: 5, label: "5 pitanja" },
     { value: 10, label: "10 pitanja" },
-    { value: 15, label: "15 pitanja" }
+    { value: 15, label: "15 pitanja" },
+    { value: 20, label: "20 pitanja" }
   ];
 
   const getSelectedRegionLabel = () => {
@@ -717,7 +718,7 @@ export default function KvizPage() {
               <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-amber-200 rounded-full border border-amber-300">
                 <div className="text-2xl">💎</div>
                 <div className="text-lg font-bold text-amber-800">
-                  {wallet.diamonds_balance}
+                  {wallet?.diamonds || 0}
                 </div>
                 <div className="text-sm text-amber-600">dijamanata</div>
               </div>

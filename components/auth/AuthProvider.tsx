@@ -51,14 +51,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes with error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.email);
-      
+      console.log('Auth state change:', event, session?.user?.email, session?.user?.email_confirmed_at);
+
       if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
         setUser(session?.user ?? null);
       } else if (event === 'SIGNED_IN') {
         setUser(session?.user ?? null);
       }
-      
+
       setLoading(false);
     });
 
@@ -66,23 +66,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    console.log('Attempting to sign in with email:', email);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
+    console.log('Sign in response:', { data, error });
+
+    if (error) {
+      console.error('Sign in error:', error);
+    } else {
+      console.log('Sign in successful, user:', data.user?.email);
+    }
+
     return { error };
   };
 
   const signUp = async (email: string, password: string) => {
+    console.log('Attempting to sign up with email:', email);
+
     // Temporarily disable domain restriction for testing
     // if (!isAllowedEmail(email)) {
     //   return { error: { message: 'Email domain not allowed. Only @edu.fit.ba and @gmail.com are permitted.' } };
     // }
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/signin`,
+      }
     });
+
+    console.log('Sign up response:', { data, error });
+
+    if (error) {
+      console.error('Sign up error:', error);
+    } else {
+      console.log('Sign up successful, user:', data.user?.email);
+    }
+
     return { error };
   };
 

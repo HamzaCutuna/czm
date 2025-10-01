@@ -49,7 +49,7 @@ export function PowerupBar({ onFiftyFifty, onSkip, onRemoveOne, disabled = false
       <div className="flex items-center gap-2">
         <div className="text-2xl">💎</div>
         <div className="text-lg font-bold text-amber-800">
-          {wallet?.diamonds_balance || 0}
+          {wallet?.diamonds || 0}
         </div>
       </div>
 

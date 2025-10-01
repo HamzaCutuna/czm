@@ -27,17 +27,21 @@ export default function SignInPage() {
       
       if (error) {
         console.error('Sign in error details:', error);
-        
+
         // Provide more specific error messages
         let errorMessage = error.message;
         if (error.message.includes('Invalid login credentials')) {
           errorMessage = 'Neispravni podaci za prijavu. Provjerite email i lozinku.';
         } else if (error.message.includes('Email not confirmed')) {
-          errorMessage = 'Email nije potvrđen. Provjerite svoju email poštu.';
+          errorMessage = 'Email nije potvrđen. Provjerite svoju email poštu i kliknite na link za potvrdu.';
         } else if (error.message.includes('Too many requests')) {
           errorMessage = 'Previše pokušaja. Pokušajte ponovo za nekoliko minuta.';
+        } else if (error.message.includes('User not found') || error.message.includes('user_not_found')) {
+          errorMessage = 'Korisnik nije pronađen. Provjerite da li ste se registrovali sa ovim email-om.';
+        } else if (error.message.includes('signup_disabled')) {
+          errorMessage = 'Registracija je trenutno onemogućena. Kontaktirajte administratora.';
         }
-        
+
         toast.error(errorMessage);
       } else {
         toast.success("Uspješno ste se prijavili!");

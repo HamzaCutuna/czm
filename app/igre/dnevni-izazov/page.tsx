@@ -35,36 +35,36 @@ export default function DailyChallengePage() {
     return a;
   }
 
-  // Check if user has already attempted today's challenge
-  const checkDailyAttempt = async () => {
-    if (!user) return false;
-    
-    try {
-      // Use API endpoint to check daily attempt instead of direct database query
-      const { data: { session: authSession } } = await supabase.auth.getSession();
-      
-      if (!authSession?.access_token) {
+    // Check if user has already attempted today's challenge
+    const checkDailyAttempt = async () => {
+      if (!user) return false;
+
+      try {
+        // Use API endpoint to check daily attempt instead of direct database query
+        const { data: { session: authSession } } = await supabase.auth.getSession();
+
+        if (!authSession?.access_token) {
+          return false;
+        }
+
+        const response = await fetch('/api/quiz/daily-challenge/check', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${authSession.access_token}`,
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          return result.alreadyClaimed || false;
+        }
+
+        return false;
+      } catch (error) {
+        console.error('Error checking daily attempt:', error);
         return false;
       }
-
-      const response = await fetch('/api/quiz/daily-challenge/check', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${authSession.access_token}`,
-        },
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        return result.alreadyAttempted || false;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Error checking daily attempt:', error);
-      return false;
-    }
-  };
+    };
 
   useEffect(() => {
     const load = async () => {
@@ -76,32 +76,45 @@ export default function DailyChallengePage() {
         const attempted = await checkDailyAttempt();
         setAlreadyAttempted(attempted);
         
-        // For testing, use a date that has events (e.g., June 28 - Sarajevo assassination)
+        // Get today's date for the daily challenge
         const today = new Date();
         const y = today.getFullYear();
         const m = today.getMonth() + 1;
         const d = today.getDate();
-        
-        // Use June 28 for testing (Sarajevo assassination - has events)
-        const testDate = new Date(y, 5, 28); // June 28
-        const daySeed = Number(`${y}${5}${28}`);
-        const iso = testDate.toISOString().split('T')[0];
+
+        // Use actual today's date for the challenge
+        const daySeed = Number(`${y}${m}${d}`);
+        const iso = today.toISOString().split('T')[0];
         const events = await fetchEventsByDate(iso);
         
         // Fallback events if none found for the date
         const fallbackEvents = [
           {
-            title: "Sarajevski atentat na Franza Ferdinanda",
-            fullText: "Sarajevski atentat na Franza Ferdinanda dogodio se 28. juna 1914. godine. Gavrilo Princip je ubio austrijskog nadvojvodu Franza Ferdinanda i njegovu suprugu Sofiju u Sarajevu, što je bio povod za početak Prvog svjetskog rata.",
-            shortText: "Atentat na Franza Ferdinanda u Sarajevu",
+            title: "Prvi svjetski rat - početak",
+            fullText: "Prvi svjetski rat počeo je 1914. godine kada je Austro-Ugarska objavila rat Srbiji nakon atentata na nadvojvodu Franza Ferdinanda u Sarajevu. Rat je trajao do 1918. godine i odnio milione života.",
+            shortText: "Početak Prvog svjetskog rata",
             year: 1914,
             imageUrl: null
           },
           {
-            title: "Bitka na Kosovu",
-            fullText: "Bitka na Kosovu se odigrala 28. juna 1389. godine između srpske vojske pod komandom kneza Lazara i osmanske vojske pod komandom sultana Murata I. Bitka je završena neodlučno, ali je imala veliki značaj za srpsku istoriju.",
-            shortText: "Bitka na Kosovu polju",
-            year: 1389,
+            title: "Bitka na Marne",
+            fullText: "Bitka na Marne bila je jedna od najvažnijih bitaka Prvog svjetskog rata. Odigrala se u septembru 1914. godine i zaustavila njemačko napredovanje prema Parizu, što je spriječilo brzi kraj rata.",
+            shortText: "Bitka na Marne",
+            year: 1914,
+            imageUrl: null
+          },
+          {
+            title: "Osnivanje SFR Jugoslavije",
+            fullText: "Socijalistička Federativna Republika Jugoslavija osnovana je 1945. godine nakon Drugog svjetskog rata. Bila je federacija šest republika: Srbije, Hrvatske, Bosne i Hercegovine, Crne Gore, Slovenije i Makedonije.",
+            shortText: "Osnivanje SFR Jugoslavije",
+            year: 1945,
+            imageUrl: null
+          },
+          {
+            title: "Dan pobjede nad fašizmom",
+            fullText: "Dan pobjede nad fašizmom obilježava se 9. maja 1945. godine kada je nacistička Njemačka potpisala kapitulaciju, čime je završen Drugi svjetski rat u Evropi.",
+            shortText: "Dan pobjede nad fašizmom",
+            year: 1945,
             imageUrl: null
           }
         ];
@@ -168,11 +181,11 @@ export default function DailyChallengePage() {
           console.error('Response status:', response.status);
           console.error('Response headers:', Object.fromEntries(response.headers.entries()));
           toast.error(`Error: ${result.error || 'Unknown error'}${result.details ? ` - ${result.details}` : ''}`);
-        } else if (result.diamondsEarned > 0) {
-          toast.success(`+${result.diamondsEarned} 💎 nagrađeno!`);
+        } else if (result.earned > 0) {
+          toast.success(`+${result.earned} 💎 nagrađeno!`);
           await refreshWallet();
-        } else if (result.alreadyAttempted) {
-          toast.info("Već ste pokušali današnji izazov");
+        } else if (result.alreadyClaimed) {
+          toast.info(result.message || "Već ste pokušali današnji izazov");
         } else {
           toast.info("Odgovor je netačan - nema nagrade");
         }
@@ -194,16 +207,25 @@ export default function DailyChallengePage() {
           <h1 className="text-5xl font-bold text-stone-800 mb-3 font-heading tracking-wide">Dnevni izazov</h1>
           <p className="text-lg text-stone-600">Pogodite godinu događaja</p>
           
-          {/* Wallet Balance */}
-          {wallet && (
+          {/* Wallet Balance - Hide for logged-out users */}
+          {user && wallet && (
             <div className="mt-6 flex justify-center">
               <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-amber-200 rounded-full border border-amber-300">
                 <div className="text-2xl">💎</div>
                 <div className="text-lg font-bold text-amber-800">
-                  {wallet.diamonds_balance}
+                  {wallet.diamonds}
                 </div>
                 <div className="text-sm text-amber-600">dijamanata</div>
               </div>
+            </div>
+          )}
+
+          {/* Show sign-in prompt for logged-out users */}
+          {!user && (
+            <div className="mt-6 text-center">
+              <p className="text-sm text-stone-500 italic">
+                Prijavite se da biste prikupljali nagrade
+              </p>
             </div>
           )}
           

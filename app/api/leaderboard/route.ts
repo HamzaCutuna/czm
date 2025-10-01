@@ -5,9 +5,15 @@ import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get current user for rate limiting (optional for leaderboard)
-    const { data: { user } } = await supabase.auth.getUser();
-    const userId = user?.id || 'anonymous';
+    // Check for Authorization header (optional for leaderboard)
+    const authHeader = request.headers.get('Authorization');
+    let userId = 'anonymous';
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user } } = await supabase.auth.getUser(token);
+      userId = user?.id || 'anonymous';
+    }
     
     // Check rate limit
     const rateLimitResult = checkRateLimit(userId, 'LEADERBOARD', request);
@@ -29,14 +35,14 @@ export async function GET(request: NextRequest) {
 
     // Get query parameters
     const { searchParams } = new URL(request.url);
-    const scope = searchParams.get('scope') || 'daily';
+    const period = searchParams.get('period') || '30'; // Changed from 'scope' to 'period'
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || DEFAULT_REWARDS_CONFIG.LEADERBOARD_PAGE_SIZE.toString());
 
-    // Validate scope
-    if (!['daily', 'weekly', 'monthly', 'all'].includes(scope)) {
+    // Validate period
+    if (!['7', '30', 'all'].includes(period)) {
       return NextResponse.json(
-        { error: 'Invalid scope. Must be daily, weekly, monthly, or all' },
+        { error: 'Invalid period. Must be 7, 30, or all' },
         { status: 400 }
       );
     }
@@ -51,7 +57,7 @@ export async function GET(request: NextRequest) {
 
     // Get leaderboard data using the database function
     const { data: leaderboardResult, error: leaderboardError } = await supabase.rpc('get_leaderboard', {
-      p_scope: scope,
+      p_period: period,
       p_page: page,
       p_page_size: pageSize
     });

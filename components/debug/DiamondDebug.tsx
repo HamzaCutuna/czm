@@ -71,7 +71,7 @@ export function DiamondDebug() {
           <div>
             <h3 className="font-semibold text-amber-800 mb-2">Current Wallet</h3>
             <div className="p-3 bg-white rounded border">
-              <p><strong>Balance:</strong> {wallet?.diamonds_balance || 0} 💎</p>
+              <p><strong>Balance:</strong> {wallet?.diamonds || 0} 💎</p>
               <p><strong>User ID:</strong> {user.id}</p>
             </div>
           </div>
