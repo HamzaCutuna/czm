@@ -47,9 +47,11 @@ export default function SignInPage() {
         toast.success("Uspješno ste se prijavili!");
         router.push("/dashboard");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Unexpected error:', err);
-      toast.error('Došlo je do greške. Pokušajte ponovo.');
+      const message =
+        err instanceof Error ? err.message : 'Došlo je do greške. Pokušajte ponovo.';
+      toast.error(message);
     }
     
     setLoading(false);

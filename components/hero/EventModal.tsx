@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment } from "react";
+import Image from "next/image";
 import { Dialog, Transition } from "@headlessui/react";
 import { X, Calendar, MapPin } from "lucide-react";
 import { pickImageUrl } from "@/types/today";
@@ -24,15 +25,6 @@ function getRegionColor(regija: string): string {
     'default': 'bg-stone-400 text-white'
   };
   return colors[regija as keyof typeof colors] || colors.default;
-}
-
-// Helper function to create a shorter title from description
-function createShortTitle(description: string): string {
-  // Take first 60 characters and add ellipsis if longer
-  if (description.length <= 60) {
-    return description;
-  }
-  return description.substring(0, 60) + '...';
 }
 
 export function EventModal({ event, isOpen, onClose, selectedDate = new Date() }: EventModalProps) {
@@ -82,12 +74,12 @@ export function EventModal({ event, isOpen, onClose, selectedDate = new Date() }
                 {/* Image section */}
                 {imageUrl ? (
                   <div className="relative h-64 bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden">
-                    <img
+                    <Image
                       src={imageUrl}
                       alt={img.alt || "Slika događaja"}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
-                    {/* Gradient overlay for better text readability */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                   </div>
                 ) : (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getAllGalleryCategories } from "@/lib/galleryData";
 import { Folder } from "lucide-react";
 import { SolidNavbar } from "@/components/navbar/SolidNavbar";
@@ -45,11 +46,11 @@ export default function GalleryPage() {
                     {/* Cover Image */}
                     <div className="aspect-[4/3] bg-stone-100 relative overflow-hidden">
                       {category.coverImage ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img 
-                          src={category.coverImage} 
+                        <Image
+                          src={category.coverImage}
                           alt={category.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-200"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

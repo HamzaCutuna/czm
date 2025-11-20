@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { CalendarEvent, CalendarCategory } from "@/lib/calendar";
 import { cn } from "@/lib/utils";
 
@@ -36,13 +37,14 @@ export default function EventCard({ event, onReadMore }: EventCardProps) {
           </span>
         </div>
         {/* Image */}
-        <div className="aspect-[4/3] overflow-hidden rounded-xl bg-stone-100">
+        <div className="aspect-[4/3] overflow-hidden rounded-xl bg-stone-100 relative">
           {event.imageUrl ? (
-            <img
+            <Image
               src={event.imageUrl}
               alt={alt}
-              loading="lazy"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 320px"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-stone-400">Nema slike</div>

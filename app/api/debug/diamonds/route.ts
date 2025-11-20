@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get wallet info
-    const { data: wallet, error: walletError } = await supabase
+    const { error: walletError } = await supabase
       .from('wallet_balances')
       .select('*')
       .eq('user_id', user.id)

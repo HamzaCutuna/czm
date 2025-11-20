@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { supabase, getWallet, getTransactions, walletIncrement, walletSpend } from '@/lib/supabase';
 import { toast } from 'sonner';
 
@@ -10,12 +10,14 @@ export interface Wallet {
   updated_at: string;
 }
 
+type WalletMetadata = Record<string, unknown>;
+
 export interface Transaction {
   id: string;
   user_id: string;
   delta: number;
   reason: string;
-  metadata: any;
+  metadata: WalletMetadata | null;
   created_at: string;
 }
 
@@ -23,8 +25,8 @@ interface WalletContextType {
   wallet: Wallet | null;
   transactions: Transaction[];
   loading: boolean;
-  grant: (amount: number, reason: string, metadata?: any) => Promise<boolean>;
-  spend: (amount: number, reason: string, metadata?: any) => Promise<boolean>;
+  grant: (amount: number, reason: string, metadata?: WalletMetadata) => Promise<boolean>;
+  spend: (amount: number, reason: string, metadata?: WalletMetadata) => Promise<boolean>;
   canAfford: (amount: number) => boolean;
   refreshWallet: () => Promise<void>;
   refreshTransactions: () => Promise<void>;
@@ -32,115 +34,60 @@ interface WalletContextType {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-export function WalletProvider({ children }: { children: ReactNode }) {
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const refreshWallet = async () => {
-    try {
-      console.log('Attempting to fetch wallet...');
-      const { data, error } = await getWallet();
-      
-      if (error) {
-        console.error('Wallet fetch error:', error);
-        if ('code' in error) {
-          console.error('Error code:', error.code);
-          console.error('Error details:', error.details);
-          console.error('Error hint:', error.hint);
-        }
-        console.error('Error message:', error.message);
-        
-        // If wallet doesn't exist yet, try to create user record first, then create wallet
-        if ('code' in error && error.code === 'PGRST116') {
-          console.log('Wallet not found, attempting to create user record and wallet...');
-          await createUserRecord();
-          await createWallet();
-          // Try again after creating user record and wallet
-          console.log('Retrying wallet fetch after user and wallet creation...');
-          const { data: retryData, error: retryError } = await getWallet();
-          if (retryError) {
-            console.error('Error fetching wallet after creation:', retryError);
-            if ('code' in retryError) {
-              console.error('Retry error code:', retryError.code);
-              console.error('Retry error details:', retryError.details);
-            }
-            console.error('Retry error message:', retryError.message);
-            setWallet(null);
-            return;
-          }
-          console.log('Wallet fetch successful after creation:', retryData);
-          setWallet(retryData);
-          return;
-        }
-        console.error('Error fetching wallet:', error);
-        setWallet(null);
-        return;
-      }
-      console.log('Wallet fetch successful:', data);
-      setWallet(data);
-    } catch (error) {
-      console.error('Error refreshing wallet:', error);
-      setWallet(null);
+async function createUserRecord() {
+  try {
+    console.log('Creating user record...');
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.log('No authenticated user found');
+      return;
     }
-  };
 
-  const createUserRecord = async () => {
-    try {
-      console.log('Creating user record...');
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.log('No authenticated user found');
-        return;
-      }
+    console.log('Authenticated user:', { id: user.id, email: user.email });
 
-      console.log('Authenticated user:', { id: user.id, email: user.email });
+    console.log('Checking if user record exists...');
+    const { data: existingUser, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', user.id)
+      .single();
 
-      // Check if user record exists
-      console.log('Checking if user record exists...');
-      const { data: existingUser, error: userError } = await supabase
+    console.log('User check result:', { existingUser, userError });
+
+    if (userError && 'code' in userError && userError.code === 'PGRST116') {
+      console.log('Creating user record for:', user.id);
+      const { error: createError } = await supabase
         .from('users')
-        .select('id')
-        .eq('id', user.id)
-        .single();
+        .insert({
+          id: user.id,
+          email: user.email,
+          display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+          privacy_setting: 'realname'
+        });
 
-      console.log('User check result:', { existingUser, userError });
-
-      if (userError && 'code' in userError && userError.code === 'PGRST116') {
-        // User doesn't exist, create them
-        console.log('Creating user record for:', user.id);
-        const { error: createError } = await supabase
-          .from('users')
-          .insert({
-            id: user.id,
-            email: user.email,
-                  display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-            privacy_setting: 'realname'
-          });
-
-        if (createError) {
-          console.error('Error creating user record:', createError);
-          if ('code' in createError) {
-            console.error('Create error code:', createError.code);
-            console.error('Create error details:', createError.details);
-          }
-          console.error('Create error message:', createError.message);
-          console.error('User data:', { id: user.id, email: user.email });
-          return;
+      if (createError) {
+        console.error('Error creating user record:', createError);
+        if ('code' in createError) {
+          console.error('Create error code:', createError.code);
+          console.error('Create error details:', createError.details);
         }
-
-        console.log('User record created successfully');
-      } else if (userError) {
-        console.error('Unexpected error checking user:', userError);
-      } else {
-        console.log('User record already exists');
+        console.error('Create error message:', createError.message);
+        console.error('User data:', { id: user.id, email: user.email });
+        return;
       }
-    } catch (error) {
-      console.error('Error in createUserRecord:', error);
-    }
-  };
 
-  const createWallet = async () => {
+      console.log('User record created successfully');
+    } else if (userError) {
+      console.error('Unexpected error checking user:', userError);
+    } else {
+      console.log('User record already exists');
+    }
+  } catch (error) {
+    console.error('Error in createUserRecord:', error);
+  }
+}
+
+async function createWallet() {
     try {
       console.log('Creating wallet...');
       const { data: { user } } = await supabase.auth.getUser();
@@ -188,9 +135,60 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error in createWallet:', error);
     }
-  };
+}
 
-  const refreshTransactions = async () => {
+export function WalletProvider({ children }: { children: ReactNode }) {
+  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refreshWallet = useCallback(async () => {
+    try {
+      console.log('Attempting to fetch wallet...');
+      const { data, error } = await getWallet();
+      
+      if (error) {
+        console.error('Wallet fetch error:', error);
+        if ('code' in error) {
+          console.error('Error code:', error.code);
+          console.error('Error details:', error.details);
+          console.error('Error hint:', error.hint);
+        }
+        console.error('Error message:', error.message);
+        
+        if ('code' in error && error.code === 'PGRST116') {
+          console.log('Wallet not found, attempting to create user record and wallet...');
+          await createUserRecord();
+          await createWallet();
+          console.log('Retrying wallet fetch after user and wallet creation...');
+          const { data: retryData, error: retryError } = await getWallet();
+          if (retryError) {
+            console.error('Error fetching wallet after creation:', retryError);
+            if ('code' in retryError) {
+              console.error('Retry error code:', retryError.code);
+              console.error('Retry error details:', retryError.details);
+            }
+            console.error('Retry error message:', retryError.message);
+            setWallet(null);
+            return;
+          }
+          console.log('Wallet fetch successful after creation:', retryData);
+          setWallet(retryData);
+          return;
+        }
+        console.error('Error fetching wallet:', error);
+        setWallet(null);
+        return;
+      }
+      console.log('Wallet fetch successful:', data);
+      setWallet(data);
+    } catch (error) {
+      console.error('Error refreshing wallet:', error);
+      setWallet(null);
+    }
+  }, []);
+
+  const refreshTransactions = useCallback(async () => {
     try {
       const { data, error } = await getTransactions(20, 0);
       if (error) {
@@ -201,7 +199,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error refreshing transactions:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const initializeWallet = async () => {
@@ -236,11 +234,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [refreshWallet, refreshTransactions]);
 
-  const grant = async (amount: number, reason: string, metadata?: any): Promise<boolean> => {
+  const grant = async (amount: number, reason: string, metadata?: WalletMetadata): Promise<boolean> => {
     try {
-      const { data, error } = await walletIncrement(amount, reason, metadata);
+      const { error } = await walletIncrement(amount, reason, metadata);
 
       if (error) {
         toast.error(`Error granting diamonds: ${error.message}`);
@@ -251,15 +249,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       await refreshWallet();
       await refreshTransactions();
       return true;
-    } catch (error: any) {
-      toast.error(`Error granting diamonds: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Error granting diamonds: ${message}`);
       return false;
     }
   };
 
-  const spend = async (amount: number, reason: string, metadata?: any): Promise<boolean> => {
+  const spend = async (amount: number, reason: string, metadata?: WalletMetadata): Promise<boolean> => {
     try {
-      const { data, error } = await walletSpend(amount, reason, metadata);
+      const { error } = await walletSpend(amount, reason, metadata);
 
       if (error) {
         toast.error(`Error spending diamonds: ${error.message}`);
@@ -270,8 +269,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       await refreshWallet();
       await refreshTransactions();
       return true;
-    } catch (error: any) {
-      toast.error(`Error spending diamonds: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Error spending diamonds: ${message}`);
       return false;
     }
   };

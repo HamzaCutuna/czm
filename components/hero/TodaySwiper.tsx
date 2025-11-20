@@ -10,8 +10,10 @@ import { absolutize } from "@/lib/http";
 import type { NaDanasnjiDanResponseDogadaj } from "@/types/today";
 import { cn } from "@/lib/utils";
 import { EventModal } from "./EventModal";
+import { HourglassLoader } from "@/components/loading/HourglassLoader";
 
 // Import Swiper styles
+import Image from "next/image";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/pagination";
@@ -61,24 +63,12 @@ export function TodaySwiper({ events, isLoading, selectedDate = new Date() }: To
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center space-x-6 py-16">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className={cn(
-              "w-72 h-96 rounded-3xl border border-stone-200 bg-white/80 animate-pulse shadow-lg",
-              i === 2 ? "scale-100" : "scale-90 opacity-70"
-            )}
-          >
-            <div className="h-56 bg-stone-200 rounded-t-3xl" />
-            <div className="p-6 space-y-4">
-              <div className="h-5 bg-stone-200 rounded w-3/4" />
-              <div className="h-4 bg-stone-200 rounded w-1/2" />
-              <div className="h-4 bg-stone-200 rounded w-2/3" />
-              <div className="h-10 bg-stone-200 rounded-full w-32" />
-            </div>
-          </div>
-        ))}
+      <div className="flex justify-center py-12">
+        <HourglassLoader
+          message="Događaji se učitavaju"
+          subtext="Molimo pričekajte – velike priče stižu za sekundu."
+          animationSrc="https://lottie.host/53637557-19ae-4bd4-bd3c-6ded5dd5dcd3/NMkPQAtHkL.lottie"
+        />
       </div>
     );
   }
@@ -113,10 +103,11 @@ export function TodaySwiper({ events, isLoading, selectedDate = new Date() }: To
         {/* Image Container */}
         <div className="h-56 bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden relative">
           {imageUrl ? (
-            <img
+            <Image
               src={imageUrl}
               alt={img.alt || "Slika događaja"}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-stone-200 to-stone-300 flex items-center justify-center">

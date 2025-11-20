@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,8 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Globe, HelpCircle, BookOpen, Trophy, Star, Clock, ChevronDown } from "lucide-react";
+import Image from "next/image";
+import { Globe, HelpCircle, BookOpen, ChevronDown } from "lucide-react";
 import { PowerupBar } from "@/components/quiz/PowerupBar";
 import { Leaderboard } from "@/components/quiz/Leaderboard";
 import { useWallet } from "@/components/wallet/WalletProvider";
@@ -60,20 +61,6 @@ interface QuizResult {
   timeSpent: number;
 }
 
-interface FunFact {
-  id: number;
-  opisDogadjaja: string;
-  datum: string;
-  regijaNaziv?: string;
-}
-
-interface LeaderboardEntry {
-  id: number;
-  username: string;
-  score: number;
-  date: string;
-}
-
 export default function KvizPage() {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -84,12 +71,9 @@ export default function KvizPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showReview, setShowReview] = useState(false);
   const [startTime, setStartTime] = useState<number>(0);
   const [result, setResult] = useState<QuizResult | null>(null);
-  const [funFact, setFunFact] = useState<FunFact | null>(null);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [sampleQuestion, setSampleQuestion] = useState<QuizQuestion | null>(null);
   const [removedOptions, setRemovedOptions] = useState<number[]>([]);
   
@@ -126,45 +110,7 @@ export default function KvizPage() {
     return questionCountOptions.find(option => option.value === settings.questionCount)?.label || "Odaberite broj pitanja";
   };
 
-  const fetchFunFact = async () => {
-    if (!BASE_URL) return;
-
-    try {
-      // Try to get a random historical event from the quiz questions
-      const response = await fetch(`${BASE_URL}/kviz-pitanja/start?BrojPitanja=1`, {
-        cache: 'no-store',
-        headers: { "Accept": "application/json" },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.length > 0 && data[0].dogdajaj) {
-          setFunFact({
-            id: data[0].dogdajaj.historijskiDogadjajId,
-            opisDogadjaja: data[0].dogdajaj.opisDogadjaja,
-            datum: data[0].dogdajaj.datum,
-            regijaNaziv: data[0].regijaNaziv
-          });
-        }
-      }
-    } catch (err) {
-      console.log('Could not fetch fun fact:', err);
-    }
-  };
-
-  const fetchLeaderboard = async () => {
-    // Mock leaderboard data for now
-    const mockLeaderboard: LeaderboardEntry[] = [
-      { id: 1, username: "HistorijskiGuru", score: 95, date: "2024-01-15" },
-      { id: 2, username: "DrevniZnalac", score: 92, date: "2024-01-14" },
-      { id: 3, username: "VremenskiPutnik", score: 88, date: "2024-01-13" },
-      { id: 4, username: "KulturniIstraživač", score: 85, date: "2024-01-12" },
-      { id: 5, username: "HistorijskiEntuzijast", score: 82, date: "2024-01-11" },
-    ];
-    setLeaderboard(mockLeaderboard);
-  };
-
-  const fetchSampleQuestion = async () => {
+  const fetchSampleQuestion = useCallback(async () => {
     if (!BASE_URL) return;
 
     try {
@@ -182,13 +128,11 @@ export default function KvizPage() {
     } catch (err) {
       console.log('Could not fetch sample question:', err);
     }
-  };
+  }, [BASE_URL]);
 
   useEffect(() => {
-    fetchFunFact();
-    fetchLeaderboard();
     fetchSampleQuestion();
-  }, []);
+  }, [fetchSampleQuestion]);
 
   const fetchQuizQuestions = async () => {
     if (!BASE_URL) {
@@ -276,16 +220,11 @@ export default function KvizPage() {
   const selectAnswer = (answerId: number) => {
     setSelectedAnswer(answerId);
     setShowFeedback(false);
-    setIsCorrect(null);
   };
 
   const confirmAnswer = () => {
     if (selectedAnswer !== null) {
       const currentQuestion = questions[currentQuestionIndex];
-      const correctAnswer = currentQuestion.odgovori.find(answer => answer.tacan);
-      const isAnswerCorrect = selectedAnswer === correctAnswer?.id;
-
-      setIsCorrect(isAnswerCorrect);
       setShowFeedback(true);
 
       setUserAnswers(prev => ({
@@ -300,7 +239,6 @@ export default function KvizPage() {
       setCurrentQuestionIndex(prev => prev + 1);
       setSelectedAnswer(null);
       setShowFeedback(false);
-      setIsCorrect(null);
     } else {
       finishQuiz();
     }
@@ -340,7 +278,6 @@ export default function KvizPage() {
     setResult(null);
     setQuestions([]);
     setShowFeedback(false);
-    setIsCorrect(null);
     setShowReview(false);
     setRemovedOptions([]);
   };
@@ -350,7 +287,6 @@ export default function KvizPage() {
     const currentQuestion = questions[currentQuestionIndex];
     if (!currentQuestion) return;
     
-    const correctAnswer = currentQuestion.odgovori.find(answer => answer.tacan);
     const wrongAnswers = currentQuestion.odgovori.filter(answer => !answer.tacan);
     
     // Remove two wrong answers randomly
@@ -368,7 +304,6 @@ export default function KvizPage() {
     const currentQuestion = questions[currentQuestionIndex];
     if (!currentQuestion) return;
     
-    const correctAnswer = currentQuestion.odgovori.find(answer => answer.tacan);
     const wrongAnswers = currentQuestion.odgovori.filter(answer => !answer.tacan);
     
     // Remove one wrong answer randomly
@@ -410,7 +345,6 @@ export default function KvizPage() {
   };
 
   const currentQuestion = questions[currentQuestionIndex];
-  const progress = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
 
   if (quizCompleted && result) {
     return (
@@ -591,13 +525,12 @@ export default function KvizPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {(currentQuestion.pitanjaSlike || currentQuestion.slike || []).map((image) => (
                       <div key={image.id} className="text-center">
-                        <img
+                        <Image
                           src={`${BASE_URL}${image.slikaPath}`}
                           alt={`Question image ${image.id}`}
+                          width={150}
+                          height={96}
                           className="w-full h-24 object-cover rounded border"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/images/placeholder.png';
-                          }}
                         />
                       </div>
                     ))}

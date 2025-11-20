@@ -6,7 +6,6 @@ import { X, LogIn, User } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "../auth/AuthProvider";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface AnimatedMobileMenuProps {
@@ -17,7 +16,6 @@ interface AnimatedMobileMenuProps {
 const mobileNavItems = [
   { href: "/", label: "POČETNA" },
   { href: "/kalendar", label: "KALENDAR" },
-  { href: "/vremenska-linija", label: "VREMENSKA LINIJA" },
   { href: "/galerija", label: "GALERIJA" },
   { href: "/igre", label: "KVIZOVI" },
   { href: "/o-projektu", label: "O PROJEKTU" },

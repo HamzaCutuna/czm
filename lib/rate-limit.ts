@@ -59,7 +59,7 @@ class RateLimiter {
   /**
    * Get remaining requests for a key
    */
-  getRemaining(key: string, maxRequests: number, windowMs: number): number {
+  getRemaining(key: string, maxRequests: number): number {
     const now = Date.now();
     const entry = this.limits.get(key);
 
@@ -134,8 +134,7 @@ export function createRateLimitKey(userId: string, endpoint: string): string {
  */
 export function checkRateLimit(
   userId: string,
-  endpoint: keyof typeof RATE_LIMITS,
-  request: Request
+  endpoint: keyof typeof RATE_LIMITS
 ): { allowed: boolean; remaining?: number; resetTime?: number } {
   const key = createRateLimitKey(userId, endpoint);
   const config = RATE_LIMITS[endpoint];
@@ -151,7 +150,7 @@ export function checkRateLimit(
     };
   }
   
-  const remaining = rateLimiter.getRemaining(key, config.maxRequests, config.windowMs);
+  const remaining = rateLimiter.getRemaining(key, config.maxRequests);
   return {
     allowed: true,
     remaining,

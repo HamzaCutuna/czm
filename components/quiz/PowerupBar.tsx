@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Zap, SkipForward, Eye, EyeOff } from "lucide-react";
+import { SkipForward, Eye, EyeOff } from "lucide-react";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { spendDiamonds } from "@/lib/supabase";
 import { DEFAULT_REWARDS_CONFIG } from "@/lib/rewards-config";
@@ -15,13 +15,15 @@ interface PowerupBarProps {
   disabled?: boolean;
 }
 
+type HelpType = keyof typeof DEFAULT_REWARDS_CONFIG.HELP_COSTS;
+
 export function PowerupBar({ onFiftyFifty, onSkip, onRemoveOne, disabled = false }: PowerupBarProps) {
   const { wallet, canAfford } = useWallet();
   
-  const handleHelp = async (helpType: string, action: () => void) => {
+  const handleHelp = async (helpType: HelpType, action: () => void) => {
     if (disabled) return;
     
-    const cost = DEFAULT_REWARDS_CONFIG.HELP_COSTS[helpType as keyof typeof DEFAULT_REWARDS_CONFIG.HELP_COSTS];
+    const cost = DEFAULT_REWARDS_CONFIG.HELP_COSTS[helpType];
     
     if (!canAfford(cost)) {
       toast.error(`Nedovoljno dijamanata! Trebate ${cost} 💎`);
@@ -29,7 +31,7 @@ export function PowerupBar({ onFiftyFifty, onSkip, onRemoveOne, disabled = false
     }
     
     try {
-      const { data, error } = await spendDiamonds(helpType, {});
+      const { error } = await spendDiamonds(helpType, {});
       
       if (error) {
         toast.error(`Greška: ${error.message}`);
@@ -38,8 +40,9 @@ export function PowerupBar({ onFiftyFifty, onSkip, onRemoveOne, disabled = false
       
       toast.success(`${helpType === 'fiftyFifty' ? '50/50' : helpType === 'skip' ? 'Skip' : 'Ukloni opciju'} korišten! -${cost} 💎`);
       action();
-    } catch (error: any) {
-      toast.error(`Greška: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Nepoznata greška';
+      toast.error(`Greška: ${message}`);
     }
   };
 

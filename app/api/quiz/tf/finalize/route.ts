@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
             }
 
     // Check rate limit
-    const rateLimitResult = checkRateLimit(user.id, 'QUIZ_FINALIZE', request);
+    const rateLimitResult = checkRateLimit(user.id, 'QUIZ_FINALIZE');
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { 
@@ -107,7 +107,6 @@ export async function POST(request: NextRequest) {
     // Parse request body
     const body = await request.json();
     const { 
-      sessionId, 
       totalQuestions, 
       correctAnswers, 
       durationMs = 0,

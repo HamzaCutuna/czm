@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,20 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   Gem, 
-  History, 
   Play, 
-  Target, 
-  ArrowRight,
-  Calendar,
-  TrendingUp,
-  Award,
   User,
   Clock,
   CheckCircle,
   LogOut
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -149,17 +143,15 @@ export default function DashboardPage() {
       } catch (error) {
         console.error('Dashboard data fetch error:', error);
         // Set fallback profile if everything fails
-        if (!profile) {
-          setProfile({
-            id: user.id,
-            email: user.email || null,
-            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
-            display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
-            avatar_url: user.user_metadata?.avatar_url || null,
-            privacy_setting: 'realname',
-            created_at: new Date().toISOString()
-          });
-        }
+        setProfile((prev) => prev ?? {
+          id: user.id,
+          email: user.email || null,
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
+          display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Korisnik',
+          avatar_url: user.user_metadata?.avatar_url || null,
+          privacy_setting: 'realname',
+          created_at: new Date().toISOString()
+        });
       } finally {
         setLoading(false);
       }
@@ -220,8 +212,6 @@ export default function DashboardPage() {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const recentTransactions = transactions.slice(0, 10);
-
   return (
     <main className="min-h-dvh bg-[--color-bg] text-stone-800">
       {/* Hero Section */}
@@ -230,9 +220,11 @@ export default function DashboardPage() {
           <div className="flex justify-center mb-6">
             <div className="p-4 bg-gradient-to-br from-amber-100 to-stone-200 rounded-full shadow-lg">
               {profile?.avatar_url ? (
-                <img 
+                <Image 
                   src={profile.avatar_url} 
                   alt="Profile" 
+                  width={48}
+                  height={48}
                   className="h-12 w-12 rounded-full object-cover"
                 />
               ) : (

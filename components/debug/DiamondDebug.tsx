@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useWallet } from "@/components/wallet/WalletProvider";
 
+type DebugInfo = Record<string, unknown> | null;
+
 export function DiamondDebug() {
-  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [debugInfo, setDebugInfo] = useState<DebugInfo>(null);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const { wallet, refreshWallet } = useWallet();
@@ -16,9 +18,13 @@ export function DiamondDebug() {
     setLoading(true);
     try {
       const response = await fetch('/api/debug/diamonds');
-      const data = await response.json();
-      setDebugInfo(data);
-    } catch (error) {
+      const data: unknown = await response.json();
+      if (data && typeof data === 'object') {
+        setDebugInfo(data as Record<string, unknown>);
+      } else {
+        setDebugInfo({ value: data });
+      }
+    } catch {
       setDebugInfo({ error: 'Failed to fetch debug info' });
     } finally {
       setLoading(false);
@@ -41,10 +47,10 @@ export function DiamondDebug() {
         }),
       });
       
-      const result = await response.json();
+      const result: unknown = await response.json();
       setDebugInfo({ testResult: result });
       await refreshWallet();
-    } catch (error) {
+    } catch {
       setDebugInfo({ error: 'Failed to test reward' });
     } finally {
       setLoading(false);

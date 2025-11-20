@@ -1,11 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { fetchEventsByDate } from "@/lib/calendar";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+
+function seededRand(seed: number) {
+  let t = seed % 2147483647;
+  if (t <= 0) t += 2147483646;
+  return () => (t = (t * 16807) % 2147483647) / 2147483647;
+}
+
+function shuffleSeeded<T>(arr: T[], seed: number): T[] {
+  const a = arr.slice();
+  const rnd = seededRand(seed);
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 export default function DailyChallengePage() {
   const { user } = useAuth();
@@ -19,52 +36,34 @@ export default function DailyChallengePage() {
   const [alreadyAttempted, setAlreadyAttempted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  function seededRand(seed: number) {
-    let t = seed % 2147483647;
-    if (t <= 0) t += 2147483646;
-    return () => (t = (t * 16807) % 2147483647) / 2147483647;
-  }
+  const checkDailyAttempt = useCallback(async () => {
+    if (!user) return false;
 
-  function shuffleSeeded<T>(arr: T[], seed: number): T[] {
-    const a = arr.slice();
-    const rnd = seededRand(seed);
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(rnd() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
+    try {
+      const { data: { session: authSession } } = await supabase.auth.getSession();
 
-    // Check if user has already attempted today's challenge
-    const checkDailyAttempt = async () => {
-      if (!user) return false;
-
-      try {
-        // Use API endpoint to check daily attempt instead of direct database query
-        const { data: { session: authSession } } = await supabase.auth.getSession();
-
-        if (!authSession?.access_token) {
-          return false;
-        }
-
-        const response = await fetch('/api/quiz/daily-challenge/check', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${authSession.access_token}`,
-          },
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          return result.alreadyClaimed || false;
-        }
-
-        return false;
-      } catch (error) {
-        console.error('Error checking daily attempt:', error);
+      if (!authSession?.access_token) {
         return false;
       }
-    };
+
+      const response = await fetch('/api/quiz/daily-challenge/check', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authSession.access_token}`,
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        return result.alreadyClaimed || false;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Error checking daily attempt:', error);
+      return false;
+    }
+  }, [user]);
 
   useEffect(() => {
     const load = async () => {
@@ -133,14 +132,16 @@ export default function DailyChallengePage() {
         const shuffled = shuffleSeeded(Array.from(candidates), daySeed + 42);
         setQuestion({ title: pick.title, fullText: pick.fullText || pick.shortText || pick.title, imageUrl: pick.imageUrl, year: baseYear });
         setOptions(shuffled);
-      } catch (e: any) {
-        setError(e?.message || 'Greška pri učitavanju izazova.');
+      } catch (e: unknown) {
+        const message =
+          e instanceof Error ? e.message : 'Greška pri učitavanju izazova.';
+        setError(message || 'Greška pri učitavanju izazova.');
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [user]);
+  }, [checkDailyAttempt]);
 
   const handleSelect = async (year: number) => {
     if (result || submitting || alreadyAttempted) return;
@@ -191,9 +192,10 @@ export default function DailyChallengePage() {
         }
         
         setAlreadyAttempted(true);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error submitting daily challenge:', error);
-        toast.error(`Error: ${error.message}`);
+        const message = error instanceof Error ? error.message : 'Nepoznata greška';
+        toast.error(`Error: ${message}`);
       } finally {
         setSubmitting(false);
       }
@@ -249,11 +251,15 @@ export default function DailyChallengePage() {
 
           {!loading && !error && question && (
             <div className="rounded-2xl border-0 shadow-2xl bg-gradient-to-br from-amber-50 to-stone-50 p-8 py-12">
-              <div className="text-xl font-semibold text-stone-900 mb-4">{question.title}</div>
               {question.imageUrl && (
                 <div className="mb-6">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={question.imageUrl} alt={question.title} className="w-full max-h-[360px] object-cover rounded-lg border border-stone-200" />
+                  <Image
+                    src={question.imageUrl}
+                    alt={question.title}
+                    width={800}
+                    height={360}
+                    className="w-full max-h-[360px] object-cover rounded-lg border border-stone-200"
+                  />
                 </div>
               )}
               <p className="text-stone-700 leading-relaxed mb-8 whitespace-pre-line">{question.fullText}</p>

@@ -1,15 +1,15 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User } from '@supabase/supabase-js';
+import type { User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string) => Promise<{ error: any }>;
-  signOut: () => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signOut: () => Promise<{ error: AuthError | Error | null }>;
   isAllowedEmail: (email: string) => boolean;
   clearSession: () => Promise<void>;
 }
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setUser(session?.user ?? null);
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Failed to get session:', err);
         setUser(null);
       } finally {
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
     console.log('Attempting to sign in with email:', email);
 
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
     console.log('Attempting to sign up with email:', email);
 
     // Temporarily disable domain restriction for testing
@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
-  const signOut = async () => {
+  const signOut = async (): Promise<{ error: AuthError | Error | null }> => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -120,10 +120,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Clear user state regardless of error
       setUser(null);
       return { error };
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to sign out:', err);
       setUser(null);
-      return { error: err };
+      return { error: err instanceof Error ? err : new Error('Unknown sign out error') };
     }
   };
 
@@ -135,7 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await supabase.auth.signOut();
       setUser(null);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to clear session:', err);
       setUser(null);
     }

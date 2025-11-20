@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check rate limit
-    const rateLimitResult = checkRateLimit(user.id, 'WALLET_SPEND', request);
+    const rateLimitResult = checkRateLimit(user.id, 'WALLET_SPEND');
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         {

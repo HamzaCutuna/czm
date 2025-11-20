@@ -655,3 +655,127 @@ body {
     right: auto !important;
   }
 }
+
+/* ===== Hourglass micro-animation for loading experience ===== */
+.hourglass-shell {
+  width: 96px;
+  height: 150px;
+  padding: 18px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.25);
+}
+
+.hourglass {
+  position: relative;
+  width: 60px;
+  height: 110px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 30px;
+  clip-path: polygon(25% 0%, 75% 0%, 55% 50%, 75% 100%, 25% 100%, 45% 50%);
+  overflow: hidden;
+  animation: hourglassFlip 6s ease-in-out infinite;
+}
+
+.hourglass::before,
+.hourglass::after {
+  content: "";
+  position: absolute;
+  left: 15%;
+  width: 70%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.hourglass::before {
+  top: 35%;
+}
+
+.hourglass::after {
+  bottom: 35%;
+}
+
+.hourglass__sand {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.4));
+}
+
+.hourglass__sand--top {
+  top: 0;
+  height: 50%;
+  animation: hourglassSandTop 6s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.hourglass__sand--bottom {
+  bottom: 0;
+  height: 0;
+  animation: hourglassSandBottom 6s infinite ease-in-out;
+  transform-origin: center;
+}
+
+@keyframes hourglassFlip {
+  0%,
+  40% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  90%,
+  100% {
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes hourglassSandTop {
+  0% {
+    height: 50%;
+    opacity: 1;
+  }
+  40% {
+    height: 0%;
+    opacity: 0.2;
+  }
+  50% {
+    height: 0%;
+    opacity: 0;
+  }
+  90% {
+    height: 50%;
+    opacity: 1;
+  }
+  100% {
+    height: 50%;
+    opacity: 1;
+  }
+}
+
+@keyframes hourglassSandBottom {
+  0% {
+    height: 0%;
+    opacity: 0.3;
+  }
+  40% {
+    height: 50%;
+    opacity: 1;
+  }
+  50% {
+    height: 50%;
+    opacity: 1;
+  }
+  90% {
+    height: 0%;
+    opacity: 0.3;
+  }
+  100% {
+    height: 0%;
+    opacity: 0.3;
+  }
+}
+

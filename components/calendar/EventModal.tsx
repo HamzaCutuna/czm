@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { CalendarEvent } from "@/lib/calendar";
 
@@ -30,8 +31,13 @@ export default function EventModal({ open, event, onOpenChange, selectedDate = n
               </div>
             </DialogHeader>
             {event.imageUrl && (
-              <div className="mt-3 rounded-xl overflow-hidden bg-stone-100 max-h-96">
-                <img src={event.imageUrl} alt={event.title} className="w-full h-auto object-cover max-h-96" />
+              <div className="mt-3 rounded-xl overflow-hidden bg-stone-100 max-h-96 relative h-72">
+                <Image
+                  src={event.imageUrl}
+                  alt={event.title}
+                  fill
+                  className="object-cover"
+                />
               </div>
             )}
             <div className="mt-4 prose prose-stone max-w-none text-stone-800 max-h-96 overflow-y-auto">

@@ -46,6 +46,14 @@ type GameState = 'settings' | 'playing' | 'finished';
 
 const STORAGE_KEY = "tf_session_v2";
 
+type QuizFinalizeResponse = {
+  diamondsEarned?: number;
+  rewardedToday?: boolean;
+  error?: string;
+  message?: string;
+  [key: string]: unknown;
+};
+
 // Curated historical questions organized by region
 const CURATED_QUESTIONS: Record<string, Statement[]> = {
   "all": [
@@ -215,6 +223,7 @@ function TrueFalseGame() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<null | { correct: boolean; explanation?: string }>(null);
+  const [quizResult, setQuizResult] = useState<QuizFinalizeResponse | null>(null);
   const [, setRegions] = useState<Region[]>([]);
   const [settings, setSettings] = useState<GameSettings>({
     questionCount: 10,
@@ -262,8 +271,9 @@ function TrueFalseGame() {
         if (mounted) {
           setRegions(regionsData);
         }
-      } catch (e: any) {
-        setError(e?.message || "Neuspješno učitavanje podataka.");
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : "Neuspješno učitavanje podataka.";
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -307,8 +317,9 @@ function TrueFalseGame() {
       setSession(newSession);
       saveSession(newSession);
       setGameState('playing');
-    } catch (e: any) {
-      setError(e?.message || "Neuspješno pokretanje igre.");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Neuspješno pokretanje igre.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -398,34 +409,36 @@ function TrueFalseGame() {
             result
           });
 
-          if (!response.ok) {
-            console.error('API error:', result);
-            toast.error(`Error: ${result.error}`);
+        if (!response.ok) {
+          console.error('API error:', result);
+          toast.error(`Error: ${result.error}`);
+        } else {
+          // Store the result for display in the finished state
+          setQuizResult(result);
+          console.log('Quiz result stored:', result);
+
+          const diamondsEarned = result?.diamondsEarned ?? 0;
+          if (diamondsEarned > 0) {
+            console.log('Diamonds earned:', diamondsEarned);
+            toast.success(`+${diamondsEarned} 💎 zaradili ste!`);
+          } else if (result?.rewardedToday) {
+            console.log('Already rewarded today');
+            toast.info("Već ste dobili nagradu danas - nema dodatne nagrade");
           } else {
-            // Store the result for display in the finished state
-            (window as any).quizResult = result;
-            console.log('Quiz result stored:', result);
-
-            if (result.diamondsEarned > 0) {
-              console.log('Diamonds earned:', result.diamondsEarned);
-              toast.success(`+${result.diamondsEarned} 💎 zaradili ste!`);
-            } else if (result.rewardedToday) {
-              console.log('Already rewarded today');
-              toast.info("Već ste dobili nagradu danas - nema dodatne nagrade");
-            } else {
-              console.log('No reward - conditions not met');
-              toast.info("Igra završena - nema nagrade za ovaj pokušaj");
-            }
-
-            // Refresh wallet to show updated balance
-            await refreshWallet();
+            console.log('No reward - conditions not met');
+            toast.info("Igra završena - nema nagrade za ovaj pokušaj");
           }
-        } catch (error: any) {
+
+          // Refresh wallet to show updated balance
+          await refreshWallet();
+        }
+        } catch (error: unknown) {
           console.error('API call error:', error);
-          if (error.name === 'AbortError') {
+          if (error instanceof DOMException && error.name === 'AbortError') {
             toast.error('API call timeout - pokušajte ponovo');
           } else {
-            toast.error(`Error: ${error.message}`);
+            const message = error instanceof Error ? error.message : 'Nepoznata greška';
+            toast.error(`Error: ${message}`);
           }
         }
       }
@@ -442,6 +455,7 @@ function TrueFalseGame() {
     localStorage.removeItem(STORAGE_KEY);
     setSession(null);
     setFeedback(null);
+    setQuizResult(null);
     setGameState('settings');
   }
 
@@ -475,8 +489,6 @@ function TrueFalseGame() {
 
   if (gameState === 'finished') {
     const percentage = session ? Math.round((session.score / session.questions.length) * 100) : 0;
-    const quizResult = (window as any).quizResult;
-
     return (
       <main className="container mx-auto px-4 py-16 bg-[--color-bg]">
         <div className="max-w-2xl mx-auto">

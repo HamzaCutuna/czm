@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     // Check rate limit (use user ID or anonymous ID)
     const userId = user?.id || 'anonymous';
-    const rateLimitResult = checkRateLimit(userId, 'QUIZ_FINALIZE', request);
+    const rateLimitResult = checkRateLimit(userId, 'QUIZ_FINALIZE');
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Lightbox } from "@/components/ui/lightbox";
 import type { LightboxItem } from "@/components/ui/lightbox";
 
@@ -36,12 +37,11 @@ export default function GalleryClient({ images }: GalleryClientProps) {
             className="group rounded-xl border border-stone-200 overflow-hidden bg-stone-50 hover:shadow-md transition-all text-left"
           >
             <div className="aspect-square bg-stone-100 relative">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
+              <Image 
                 src={image.url} 
                 alt={image.filename}
-                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform"
-                loading="lazy"
+                fill
+                className="object-cover group-hover:scale-[1.02] transition-transform"
               />
             </div>
           </button>

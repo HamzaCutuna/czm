@@ -4,12 +4,24 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 // Debug environment variables
-console.log('Supabase URL:', supabaseUrl);
-console.log('Supabase Anon Key:', supabaseAnonKey ? 'Present' : 'Missing');
+if (process.env.NODE_ENV === 'development') {
+  console.log('Supabase URL:', supabaseUrl);
+  console.log('Supabase Anon Key:', supabaseAnonKey ? 'Present' : 'Missing');
+}
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
+
+type Metadata = Record<string, unknown>;
+
+const getErrorMessage = (error: unknown): string | null => {
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const message = (error as { message?: unknown }).message;
+    return typeof message === 'string' ? message : null;
+  }
+  return null;
+};
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -17,8 +29,15 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
-    // Add debug logging
-    debug: true
+    debug: process.env.NODE_ENV === 'development'
+  },
+  global: {
+    headers: {
+      'x-client-info': 'tvkalendar-web'
+    }
+  },
+  realtime: {
+    logLevel: 'error'
   }
 });
 
@@ -34,9 +53,10 @@ export const supabaseAdmin = supabaseServiceKey
   : null;
 
 // Global error handler for auth errors
-export const handleAuthError = (error: any) => {
-  if (error?.message?.includes('refresh_token_not_found') || 
-      error?.message?.includes('Invalid Refresh Token')) {
+export const handleAuthError = (error: unknown) => {
+  const message = getErrorMessage(error);
+  if (message?.includes('refresh_token_not_found') || 
+      message?.includes('Invalid Refresh Token')) {
     console.warn('Refresh token invalid, clearing session');
     supabase.auth.signOut();
     return true; // Indicates session was cleared
@@ -90,7 +110,7 @@ export const getCurrentUser = async () => {
 };
 
 // Updated Wallet RPC functions using new naming
-export const walletIncrement = async (amount: number, reason: string, metadata?: any) => {
+export const walletIncrement = async (amount: number, reason: string, metadata?: Metadata) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return { data: null, error: { message: 'User not authenticated' } };
@@ -110,7 +130,7 @@ export const walletIncrement = async (amount: number, reason: string, metadata?:
   return { data, error };
 };
 
-export const walletSpend = async (amount: number, reason: string, metadata?: any) => {
+export const walletSpend = async (amount: number, reason: string, metadata?: Metadata) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return { data: null, error: { message: 'User not authenticated' } };
@@ -254,7 +274,7 @@ export const getLeaderboard = async (period: string = '30', page: number = 1, pa
 };
 
 // New API functions for the rewards system
-export const spendDiamonds = async (helpType: string, metadata: any = {}) => {
+export const spendDiamonds = async (helpType: string, metadata: Metadata = {}) => {
   // Get the current session token for authentication
   const { data: { session } } = await supabase.auth.getSession();
 

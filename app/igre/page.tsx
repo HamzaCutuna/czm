@@ -2,9 +2,36 @@
 
 import Link from "next/link";
 import { Gamepad2, CalendarDays, HelpCircle, ToggleLeft } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const igre = [
+type GameDefinition = {
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+  icon: LucideIcon;
+  disabled?: boolean;
+};
+
+type FlatEventResponse = {
+  Godina?: number | string;
+  godina?: number | string;
+  Regija?: string | null;
+  Kategorija?: string | null;
+  regija?: string | null;
+  RegijaId?: number | string | null;
+  regijaId?: number | string | null;
+};
+
+type RegijaResponse = {
+  Id?: number | string;
+  id?: number | string;
+  Naziv?: string | null;
+  naziv?: string | null;
+};
+
+const igre: GameDefinition[] = [
   {
     id: 'quiz',
     title: 'Kviz znanja',
@@ -49,7 +76,7 @@ export default function IgrePage() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-6">
           {igre.map(game => {
             const Icon = game.icon;
-            const disabled = (game as any).disabled;
+            const disabled = game.disabled ?? false;
             const content = (
               <div className={`rounded-2xl border border-stone-200 bg-white p-6 shadow-sm hover:shadow-md transition ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}>
                 <div className="flex items-center gap-3 mb-3">
@@ -87,14 +114,19 @@ function StatsSection() {
           fetch(new URL("/api/events-flat?take=0&onlyWithImage=false", window.location.origin).toString(), { cache: "no-store" }),
           fetch(new URL("/api/regije", window.location.origin).toString(), { cache: "no-store" })
         ]);
-        const data = await eventsRes.json();
-        const regije = await regijeRes.json();
+        const data: unknown = await eventsRes.json();
+        const regije: unknown = await regijeRes.json();
         if (!Array.isArray(data)) return;
         let total = 0, bih = 0, region = 0, world = 0;
         let minYear = Infinity, maxYear = -Infinity;
         const regijaMap = new Map<number, string>();
         if (Array.isArray(regije)) {
-          for (const r of regije) regijaMap.set(Number(r.Id ?? r.id), String(r.Naziv ?? r.naziv));
+          for (const r of regije as RegijaResponse[]) {
+            const key = Number(r.Id ?? r.id);
+            if (Number.isNaN(key)) continue;
+            const value = String(r.Naziv ?? r.naziv ?? '');
+            regijaMap.set(key, value);
+          }
         }
         const classify = (name: string, regijaId?: number): 'BiH' | 'Region' | 'Svijet' => {
           const fromId = regijaId != null ? regijaMap.get(Number(regijaId)) : undefined;
@@ -104,7 +136,7 @@ function StatsSection() {
           if (/(^|\b)(svijet|svjets|svets|world|global)/.test(source)) return 'Svijet';
           return 'Svijet';
         };
-        for (const it of data as any[]) {
+        for (const it of data as FlatEventResponse[]) {
           total++;
           const y = Number(it.Godina ?? it.godina);
           if (Number.isFinite(y) && y > 0) { minYear = Math.min(minYear, y); maxYear = Math.max(maxYear, y); }

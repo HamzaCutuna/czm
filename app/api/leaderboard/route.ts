@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Check rate limit
-    const rateLimitResult = checkRateLimit(userId, 'LEADERBOARD', request);
+    const rateLimitResult = checkRateLimit(userId, 'LEADERBOARD');
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { 

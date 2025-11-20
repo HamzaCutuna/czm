@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     console.log('User authenticated:', user.id, user.email);
 
     // Check rate limit
-    const rateLimitResult = checkRateLimit(user.id, 'DAILY_CHALLENGE_CLAIM', request);
+    const rateLimitResult = checkRateLimit(user.id, 'DAILY_CHALLENGE_CLAIM');
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         {

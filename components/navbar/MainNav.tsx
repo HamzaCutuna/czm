@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/", label: "POČETNA" },
   { href: "/kalendar", label: "KALENDAR" },
-  { href: "/vremenska-linija", label: "VREMENSKA LINIJA" },
   { href: "/galerija", label: "GALERIJA" },
   { href: "/igre", label: "KVIZOVI" },
   { href: "/o-projektu", label: "O PROJEKTU" },

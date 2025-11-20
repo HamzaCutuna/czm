@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Image from "next/image";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 type LightboxKind = 'image' | 'video' | 'audio';
@@ -32,7 +33,15 @@ export function Lightbox({ open, onOpenChange, item }: LightboxProps) {
         </DialogTitle>
         <div className="relative w-full h-full flex items-center justify-center p-4">
           {item?.type === 'image' && (
-            <img src={item.src} alt={item.title || 'media'} className="max-h-[80vh] w-auto object-contain rounded" />
+            <div className="relative w-full h-[80vh]">
+              <Image
+                src={item.src}
+                alt={item.title || 'media'}
+                fill
+                className="object-contain rounded"
+                sizes="100vw"
+              />
+            </div>
           )}
           {item?.type === 'video' && (
             <video src={item.src} controls className="max-h-[80vh] w-auto rounded" />

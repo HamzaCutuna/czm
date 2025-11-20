@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Trophy, Calendar, Clock, Target, Gem } from "lucide-react";
+import { Trophy, Clock, Target } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 interface LeaderboardEntry {
@@ -30,6 +29,18 @@ export function Leaderboard() {
     
     try {
       // Fetch top 10 quiz results with user profiles
+      type SupabaseLeaderboardRow = {
+        user_id: string;
+        score_percent: number;
+        correct_count: number;
+        total_count: number;
+        duration_ms: number;
+        created_at: string;
+        profiles?: {
+          full_name?: string | null;
+        } | null;
+      };
+
       const { data, error } = await supabase
         .from('quiz_results')
         .select(`
@@ -51,21 +62,22 @@ export function Leaderboard() {
         return;
       }
       
-              // Transform data to include rank and flatten profile data
-              const transformedData = data?.map((entry, index) => ({
-                rank: index + 1,
-                user_id: entry.user_id,
-                full_name: (entry.profiles as any)?.full_name || 'Korisnik',
-                score_percent: entry.score_percent,
-                correct_count: entry.correct_count,
-                total_count: entry.total_count,
-                duration_ms: entry.duration_ms,
-                created_at: entry.created_at
-              })) || [];
+      const rows = (data ?? []) as SupabaseLeaderboardRow[];
+      const transformedData = rows.map((entry, index) => ({
+        rank: index + 1,
+        user_id: entry.user_id,
+        full_name: entry.profiles?.full_name || 'Korisnik',
+        score_percent: entry.score_percent,
+        correct_count: entry.correct_count,
+        total_count: entry.total_count,
+        duration_ms: entry.duration_ms,
+        created_at: entry.created_at
+      }));
       
       setLeaderboardData(transformedData);
-    } catch (err: any) {
-      setError(err.message || 'Greška pri učitavanju rang liste');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Greška pri učitavanju rang liste';
+      setError(message);
     } finally {
       setLoading(false);
     }

@@ -8,7 +8,6 @@ import { todayInSarajevo } from "@/lib/tz";
 import CustomDatePicker from "@/components/calendar/CustomDatePicker";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 
 // Helper function to format date
 function formatBsDate(d: number, m: number) {
@@ -21,7 +20,6 @@ interface HeroTodayProps {
 }
 
 export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
-  const today = todayInSarajevo();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   
   // Convert selected date to day/month format for the API
@@ -29,11 +27,6 @@ export function HeroToday({ selectedDate, onDateChange }: HeroTodayProps) {
   const selectedMonth = selectedDate.getMonth() + 1;
   
   const { data, error, isLoading } = useTodayEvents(selectedDay, selectedMonth);
-  
-  // Use found date from API if available, otherwise use selected date
-  const displayDate = data?.dogadajiDate && data.dogadajiDate.Dan && data.dogadajiDate.Mjesec ? 
-    { dan: data.dogadajiDate.Dan, mjesec: data.dogadajiDate.Mjesec } : 
-    { dan: selectedDay, mjesec: selectedMonth };
 
   const handleDateConfirm = (date: Date) => {
     onDateChange(date);

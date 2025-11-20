@@ -42,7 +42,6 @@ export async function fetchEventsByDate(dateISO: string): Promise<CalendarEvent[
 
   const debug = new URLSearchParams(window.location.search).has('debug');
   if (debug) {
-    // eslint-disable-next-line no-console
     console.log('[Calendar] Raw regije from API:', regije.map(r => ({ naziv: r.naziv, count: (r.dogadaji || []).length })));
   }
 
@@ -59,7 +58,6 @@ export async function fetchEventsByDate(dateISO: string): Promise<CalendarEvent[
     if (raw === 'BiH' || raw === 'Region' || raw === 'Svijet') return raw as CalendarCategory;
     // Unknown: leave as Svijet but log in debug mode
     if (new URLSearchParams(window.location.search).has('debug')) {
-      // eslint-disable-next-line no-console
       console.warn('[Calendar] Unknown category name, defaulting to Svijet:', raw);
     }
     return 'Svijet';
@@ -106,7 +104,6 @@ export async function fetchEventsByDate(dateISO: string): Promise<CalendarEvent[
       Svijet: events.filter(e => e.category === 'Svijet').length,
       total: events.length,
     };
-    // eslint-disable-next-line no-console
     console.log('[Calendar] Mapped counts:', mapped, { sample: events.slice(0, 3) });
   }
   return events;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getGalleryCategoryById } from "@/lib/galleryData";
 import { Folder, ArrowLeft } from "lucide-react";
@@ -76,11 +77,11 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                     {/* Cover Image */}
                     <div className="aspect-[4/3] bg-stone-100 relative overflow-hidden">
                       {event.coverImage ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img 
-                          src={event.coverImage} 
+                        <Image
+                          src={event.coverImage}
                           alt={event.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-200"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

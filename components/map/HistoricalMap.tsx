@@ -2,11 +2,15 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import { normalizeApiResponse, type NormalizedEvent } from "@/lib/eventsSchema";
+import {
+  normalizeApiResponse,
+  type NormalizedEvent,
+} from "@/lib/eventsSchema";
 import { detectCountry } from "@/utils/countryDetector";
 import { geocodeCountryOnce } from "@/utils/geocode";
 import { groupByCoordinate } from "@/utils/geoGroup";
 import sampleEvents from "@/data/sampleEvents";
+import { HourglassLoader } from "@/components/loading/HourglassLoader";
 
 const LeafletClient = dynamic(() => import("./LeafletClient"), { ssr: false });
 
@@ -20,11 +24,6 @@ function HistoricalMap({ selectedDate }: HistoricalMapProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUsingSampleData, setIsUsingSampleData] = useState(false);
-  const [coordinateStats, setCoordinateStats] = useState({
-    withCoords: 0,
-    viaCountry: 0,
-    unresolved: 0
-  });
   
   useEffect(() => setMounted(true), []);
 
@@ -34,6 +33,8 @@ function HistoricalMap({ selectedDate }: HistoricalMapProps) {
   );
 
   useEffect(() => {
+    let cancelled = false;
+
     (async () => {
       setLoading(true);
       setError(null);
@@ -55,13 +56,21 @@ function HistoricalMap({ selectedDate }: HistoricalMapProps) {
         }
       } catch (err) {
         console.warn('API fetch failed:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch events');
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to fetch events');
+        }
       }
       
       if (!json) {
         json = { events: sampleEvents };
-        setIsUsingSampleData(true);
+        if (!cancelled) {
+          setIsUsingSampleData(true);
+        }
         console.info('API unavailable; using sample events');
+      }
+
+      if (cancelled) {
+        return;
       }
 
       const normalized = normalizeApiResponse(json);
@@ -89,7 +98,10 @@ function HistoricalMap({ selectedDate }: HistoricalMapProps) {
         unresolved++;
       }
 
-      setCoordinateStats({ withCoords, viaCountry, unresolved });
+      if (cancelled) {
+        return;
+      }
+
       console.log('Coordinate resolution stats:', { withCoords, viaCountry, unresolved });
       
       if (unresolved > 0) {
@@ -99,6 +111,10 @@ function HistoricalMap({ selectedDate }: HistoricalMapProps) {
       setEvents(resolved);
       setLoading(false);
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedDate]);
 
   const pins = useMemo(() => groupByCoordinate(events, 3), [events]);
@@ -116,9 +132,12 @@ function HistoricalMap({ selectedDate }: HistoricalMapProps) {
           
           {/* Status indicators */}
           {loading && (
-            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-stone-500">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-stone-600" />
-              Učitavanje događaja...
+            <div className="mt-8 flex justify-center">
+              <HourglassLoader
+                message="Karta događaja se učitava"
+                subtext="Prikupljamo podatke i crtamo pinove, molimo pričekajte…"
+                variant="light"
+              />
             </div>
           )}
           

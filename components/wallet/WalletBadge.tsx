@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useWallet } from "./WalletProvider";
 import { useAuth } from "../auth/AuthProvider";
-import { Gem, LogIn } from "lucide-react";
+import { Gem } from "lucide-react";
 
 interface WalletBadgeProps {
   isSolid?: boolean;

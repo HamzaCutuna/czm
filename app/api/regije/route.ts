@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -6,7 +6,7 @@ if (!BASE_URL) {
   throw new Error("NEXT_PUBLIC_API_BASE_URL is not set");
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const backendUrl = new URL("/regije/lookup", BASE_URL);
     const res = await fetch(backendUrl.toString(), { cache: "no-store", headers: { Accept: "application/json" } });
